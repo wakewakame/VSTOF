@@ -446,7 +446,7 @@ public:
 class AllProcess {
 public:
 	//変数初期化
-	WINDOW_INFO win_info; //ウィンドウの情報関数初期化
+	WINDOW_INFO win_info;
 
 	//コンストラクト
 	ShareMem sm; //共有メモリクラス
