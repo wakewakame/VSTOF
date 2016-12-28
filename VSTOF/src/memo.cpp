@@ -1,0 +1,1 @@
+void add(frame *parent, frame *self, std::string name, POINT size, bool mode, int gap, int length, bool lock) { //ƒtƒŒ[ƒ€‚Ì’Ç‰Á
