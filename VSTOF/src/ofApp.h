@@ -391,14 +391,18 @@ public:
 	}
 	//フレームの名称描画
 	void FrameName(frame *root) {
-		ofSetColor(255, 0, 0, 255);
-		//自フレーム描画
-		ofDrawBitmapString(root->name, root->pos.left, root->pos.top);
-		//自フレームに子フレームがあれば全部描画
+		ofSetColor(255, 255, 255, 255);
+		//自フレームが子フレームを持ってた場合
 		if (root->num_child != 0) {
-			for (int i = 0; i < root->num_child; i++) {
-				FrameName(root->childs[i]);
+			//自フレームに子フレームがあれば全部描画
+			if (root->num_child != 0) {
+				for (int i = 0; i < root->num_child; i++) {
+					FrameName(root->childs[i]);
+				}
 			}
+		}else{
+			//子フレームを持っていない場合
+			ofDrawBitmapString(root->name, root->pos.left + 4, root->pos.top + 12);
 		}
 	}
 	void rawwave(frame *f, RECTF len, float *samples, int num_sample, float *allrawwave, int num_allrawwave, POINT rlen) { //生波形データの使用部分選択
