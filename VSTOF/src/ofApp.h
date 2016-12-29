@@ -289,8 +289,8 @@ public:
 						child_pos.top = f->childs[i-1]->pos.bottom + f->gap;
 					}
 					//下位置
-					if (f->childs[i]->lock) {
-						//固定サイズフレームの場合は割合変換不要
+					if ((f->childs[i]->lock)||(f->scroll)) {
+						//固定サイズフレームorスクロール可フレームの場合は割合変換不要
 						child_pos.bottom =
 							child_pos.top +
 							f->childs[i]->length;
@@ -363,6 +363,44 @@ public:
 		frames.add(&p_frame.fadechange, &p_frame.fadechange_pitch, "fadechange_pitch", 0, 4, 100, 0);
 
 		frames.get_length(&p_frame.root); //全フレームのlength等取得
+	}
+};
+
+//ウィンドウイベント処理クラス
+class WIN_EVENT {
+public:
+	//変数宣言
+	HWND hwnd; //現在指定されているウィンドウハンドル
+	HWND m_hwnd; //マウス下の最前面ウィンドウハンドル
+	POINT mouse_pos; //マウス座標
+
+	//関数宣言
+	//ウィンドウハンドル設定関数
+	void SetHwnd(HWND h) {
+		hwnd = h;
+		return;
+	}
+	//マウスが自ウィンドウを操作しているかどうかの判定
+	bool GetMouseOnWindow() {
+		GetMousePos();
+		return 0;
+	}
+	//マウスが指定範囲内を操作しているかどうかの判定
+	bool GetMouseOnRect() {
+		GetMousePos();
+		return 0;
+	}
+	//マウスホイール変化量取得関数
+	int GetScroll() {
+
+		return 0;
+	}
+	//マウス座標取得関数
+	void GetMousePos() {
+		MSG msg;
+		GetMessage(&msg, NULL, 0, 0);
+		//mouse_pos = ; //マウス座標代入
+		return;
 	}
 };
 
