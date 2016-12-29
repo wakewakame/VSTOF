@@ -67,10 +67,13 @@ struct frame {
 	int length; //全フレームが初期値サイズ時の自フレームのサイズ
 	bool lock; //各子フレームの長さ(mode=0なら縦幅,mode=1なら横幅)の固定on/off
 	int lock_length; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
+	bool scroll;
 };
 //パラメーター値構造体
 struct VSTParameteresFrames {
 	frame root;
+	frame all;
+	frame scroll;
 	frame tone, fade;
 	//音色系
 	frame make_auto; //自動で音色を生成するか
@@ -187,6 +190,7 @@ public:
 		self->lock = lock; //現在の自フレームの長さ(mode = 0なら縦幅, mode = 1なら横幅)の固定のon/off
 		self->index = 0;
 		self->lock_length = 0; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
+		self->scroll = 0; //スクロールon/off
 		//親フレームが未指定の場合、以下の処理を省く
 		if (parent == nullptr) {
 			return;
@@ -195,6 +199,10 @@ public:
 		self->index = self->parent->num_child;//同フレーム内の自フレームの割当番号(=0,1,2,3,...)
 		self->parent->num_child += 1; //親フレーム情報更新
 		return;
+	}
+	void add(frame *parent, frame *self, std::string name, bool mode, int gap, int length, bool lock, bool scroll) {
+		add(parent, self, name, mode, gap, length, lock);
+		self->scroll = 1;
 	}
 	//全フレームの登録完了時に、末端フレームから全親フレームのlength等取得関数
 	void get_length(frame *f) {
@@ -321,9 +329,11 @@ public:
 	//関数宣言
 	Parameteres() { //全パラメーター分のフレーム作成
 		//フレーム生成
-		//frames.add(frame *parent, frame *self, std::string name, bool mode, int gap, int length, bool lock)
-		frames.add(nullptr, &p_frame.root, "root", 0, 4, 0, 0);
-		frames.add(&p_frame.root, &p_frame.tone, "tone", 0, 4, 0, 0); //音色設定フレーム生成
+		//frames.add(frame *parent, frame *self, std::string name, bool mode, int gap, int length, bool lock, bool scroll)
+		frames.add(nullptr, &p_frame.root, "root", 1, 0, 0, 0);
+		frames.add(&p_frame.root, &p_frame.all, "all", 0, 4, 0, 0, 1);
+		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 0, 4, 16, 1);
+		frames.add(&p_frame.all, &p_frame.tone, "tone", 0, 4, 0, 0); //音色設定フレーム生成
 		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 0, 4, 100, 0); //自動で音色を生成するか
 		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 4, 0, 0); //下記インデントを束ねる
 		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 4, 0, 100, 0); //生波形データの使用をするかどうか
@@ -339,7 +349,7 @@ public:
 		frames.add(&p_frame.hostpar, &p_frame.pitch, "pitch", 0, 4, 100, 0); //音程(IDI値に加算)
 		frames.add(&p_frame.tone, &p_frame.wave_limit, "wave_limit", 0, 4, 100, 0); //波形の絶対値の上限
 		frames.add(&p_frame.tone, &p_frame.outwave, "outwave", 0, 4, 100, 0); //出力波形
-		frames.add(&p_frame.root, &p_frame.fade, "fade", 0, 4, 0, 0); //フェード設定フレーム生成
+		frames.add(&p_frame.all, &p_frame.fade, "fade", 0, 4, 0, 0); //フェード設定フレーム生成
 		frames.add(&p_frame.fade, &p_frame.use_string_mode, "use_string_mode", 0, 4, 100, 0); //弦モードの使用をするかどうか
 		frames.add(&p_frame.fade, &p_frame.use_fade_change, "use_fade_change", 0, 4, 100, 0); //なめらかな音程,音量の変化を使用するかどうか(2つ同時に音を出せない)
 		frames.add(&p_frame.fade, &p_frame.fadein, "fadein", 1, 4, 0, 0);
