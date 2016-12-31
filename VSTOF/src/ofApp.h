@@ -71,6 +71,8 @@ struct frame {
 //パラメーター値構造体
 struct VSTParameteresFrames {
 	frame root;
+	frame all;
+	frame scroll;
 	frame tone, fade;
 	//音色系
 	frame make_auto; //自動で音色を生成するか
@@ -172,7 +174,7 @@ class Frames {
 public:
 	//関数宣言
 	//フレーム追加関数(引数:親フレーム(なければnullptr),自フレーム,フレーム名,子フレームの配列方法(0なら縦,1なら横),子フレーム間の間隔,自フレームの長さ(mode=0なら高さ,1なら幅),自フレームを固定サイズにするon/off)
-	void add(frame *parent, frame *self, std::string name, bool mode, int gap, int length, bool lock) {
+	void add(frame *parent, frame *self, std::string name, int length, bool lock) {
 		self->parent = parent; //親フレームのポインタ
 		self->num_child = 0; //子フレームの数初期化
 		self->pos.left = 0; //フレーム左座標
@@ -181,8 +183,8 @@ public:
 		self->pos.bottom = 0; //フレーム下座標
 		self->size = {0,0}; //フレームサイズ
 		self->name = name; //フレームの名称
-		self->mode = mode; //子フレームが縦並び=0,横並び=1
-		self->gap = gap; //子フレーム間同士の隙間(px単位)
+		self->mode = 0; //子フレームが縦並び=0,横並び=1
+		self->gap = 0; //子フレーム間同士の隙間(px単位)
 		self->length = length; //全フレームが初期値サイズ時の自フレームのサイズ
 		self->lock = lock; //現在の自フレームの長さ(mode = 0なら縦幅, mode = 1なら横幅)の固定のon/off
 		self->index = 0;
@@ -194,6 +196,11 @@ public:
 		self->parent->childs.push_back(self); //親フレームに自フレーム追加登録
 		self->index = self->parent->num_child;//同フレーム内の自フレームの割当番号(=0,1,2,3,...)
 		self->parent->num_child += 1; //親フレーム情報更新
+		return;
+	}
+	void set_parent(frame *self, bool mode, int gap) {
+		self->mode = mode; //子フレームが横並びなら0,縦並びなら1
+		self->gap = gap; //小フレーム間の隙間サイズ(px単位)
 		return;
 	}
 	//全フレームの登録完了時に、末端フレームから全親フレームのlength等取得関数
@@ -282,7 +289,7 @@ public:
 					}
 					//下位置
 					if (f->childs[i]->lock) {
-						//固定サイズフレームの場合は割合変換不要
+						//固定サイズフレームorスクロール可フレームの場合は割合変換不要
 						child_pos.bottom =
 							child_pos.top +
 							f->childs[i]->length;
@@ -322,37 +329,87 @@ public:
 	Parameteres() { //全パラメーター分のフレーム作成
 		//フレーム生成
 		//frames.add(frame *parent, frame *self, std::string name, bool mode, int gap, int length, bool lock)
-		frames.add(nullptr, &p_frame.root, "root", 0, 4, 0, 0);
-		frames.add(&p_frame.root, &p_frame.tone, "tone", 0, 4, 0, 0); //音色設定フレーム生成
-		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 0, 4, 100, 0); //自動で音色を生成するか
-		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 4, 0, 0); //下記インデントを束ねる
-		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 4, 0, 100, 0); //生波形データの使用をするかどうか
-		frames.add(&p_frame.raw_wave_para, &p_frame.rawwave, "rawwave", 0, 4, 100, 0); //生波形の使用部分波形(ファイルマッピングにするかも(´・ω・｀))
-		frames.add(&p_frame.raw_wave_para, &p_frame.base_pitch, "base_pitch", 0, 4, 100, 0); //基音位置(手動変更可)
-		frames.add(&p_frame.tone, &p_frame.tone_para, "tone_para", 0, 4, 0, 0); //下記インデントのフレームを束ねる
-		frames.add(&p_frame.tone_para, &p_frame.change_natural, "change_natural", 0, 4, 100, 0); //音程変化を自然にするか
-		frames.add(&p_frame.tone_para, &p_frame.overtones, "overtones", 0, 4, 100, 0); //倍音グラフor共鳴スペクトルグラフ
-		frames.add(&p_frame.tone_para, &p_frame.iovertones, "iovertones", 0, 4, 100, 0); //倍音の数
-		frames.add(&p_frame.tone_para, &p_frame.wave_type, "wave_type", 0, 4, 100, 0); //基本波形の形
-		frames.add(&p_frame.tone_para, &p_frame.hostpar, "hostpar", 1, 4, 0, 0); //下記インデントのフレームを束ねる
-		frames.add(&p_frame.hostpar, &p_frame.vol, "vol", 0, 4, 100, 0); //音量
-		frames.add(&p_frame.hostpar, &p_frame.pitch, "pitch", 0, 4, 100, 0); //音程(IDI値に加算)
-		frames.add(&p_frame.tone, &p_frame.wave_limit, "wave_limit", 0, 4, 100, 0); //波形の絶対値の上限
-		frames.add(&p_frame.tone, &p_frame.outwave, "outwave", 0, 4, 100, 0); //出力波形
-		frames.add(&p_frame.root, &p_frame.fade, "fade", 0, 4, 0, 0); //フェード設定フレーム生成
-		frames.add(&p_frame.fade, &p_frame.use_string_mode, "use_string_mode", 0, 4, 100, 0); //弦モードの使用をするかどうか
-		frames.add(&p_frame.fade, &p_frame.use_fade_change, "use_fade_change", 0, 4, 100, 0); //なめらかな音程,音量の変化を使用するかどうか(2つ同時に音を出せない)
-		frames.add(&p_frame.fade, &p_frame.fadein, "fadein", 1, 4, 0, 0);
-		frames.add(&p_frame.fadein, &p_frame.fadein_vol, "fadein_vol", 0, 4, 100, 0);
-		frames.add(&p_frame.fadein, &p_frame.fadein_pitch, "fadein_pitch", 0, 4, 100, 0);
-		frames.add(&p_frame.fade, &p_frame.fadeout, "fadeout", 1, 4, 0, 0);
-		frames.add(&p_frame.fadeout, &p_frame.fadeout_vol, "fadeout_vol", 0, 4, 100, 0);
-		frames.add(&p_frame.fadeout, &p_frame.fadeout_pitch, "fadeout_pitch", 0, 4, 100, 0);
-		frames.add(&p_frame.fade, &p_frame.fadechange, "fadechange", 1, 4, 0, 0);
-		frames.add(&p_frame.fadechange, &p_frame.fadechange_vol, "fadechange_vol", 0, 4, 100, 0);
-		frames.add(&p_frame.fadechange, &p_frame.fadechange_pitch, "fadechange_pitch", 0, 4, 100, 0);
+		//->
+		//frames.add(frame *parent, frame *self, std::string name, int length, bool lock, bool mode, int gap)
+		frames.add(nullptr, &p_frame.root, "root", 0, 0);
+		frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
+		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
+		frames.add(&p_frame.all, &p_frame.tone, "tone", 0, 0); //音色設定フレーム生成
+		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 100, 0); //自動で音色を生成するか
+		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 0); //下記インデントを束ねる
+		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 100, 0); //生波形データの使用をするかどうか
+		frames.add(&p_frame.raw_wave_para, &p_frame.rawwave, "rawwave", 100, 0); //生波形の使用部分波形(ファイルマッピングにするかも(´・ω・｀))
+		frames.add(&p_frame.raw_wave_para, &p_frame.base_pitch, "base_pitch", 100, 0); //基音位置(手動変更可)
+		frames.add(&p_frame.tone, &p_frame.tone_para, "tone_para", 0, 0); //下記インデントのフレームを束ねる
+		frames.add(&p_frame.tone_para, &p_frame.change_natural, "change_natural", 100, 0); //音程変化を自然にするか
+		frames.add(&p_frame.tone_para, &p_frame.overtones, "overtones", 100, 0); //倍音グラフor共鳴スペクトルグラフ
+		frames.add(&p_frame.tone_para, &p_frame.iovertones, "iovertones", 100, 0); //倍音の数
+		frames.add(&p_frame.tone_para, &p_frame.wave_type, "wave_type", 100, 0); //基本波形の形
+		frames.add(&p_frame.tone_para, &p_frame.hostpar, "hostpar", 0, 0); //下記インデントのフレームを束ねる
+		frames.add(&p_frame.hostpar, &p_frame.vol, "vol", 100, 0); //音量
+		frames.add(&p_frame.hostpar, &p_frame.pitch, "pitch", 100, 0); //音程(IDI値に加算)
+		frames.add(&p_frame.tone, &p_frame.wave_limit, "wave_limit", 100, 0); //波形の絶対値の上限
+		frames.add(&p_frame.tone, &p_frame.outwave, "outwave", 100, 0); //出力波形
+		frames.add(&p_frame.all, &p_frame.fade, "fade", 0, 0); //フェード設定フレーム生成
+		frames.add(&p_frame.fade, &p_frame.use_string_mode, "use_string_mode", 100, 0); //弦モードの使用をするかどうか
+		frames.add(&p_frame.fade, &p_frame.use_fade_change, "use_fade_change", 100, 0); //なめらかな音程,音量の変化を使用するかどうか(2つ同時に音を出せない)
+		frames.add(&p_frame.fade, &p_frame.fadein, "fadein", 0, 0);
+		frames.add(&p_frame.fadein, &p_frame.fadein_vol, "fadein_vol", 100, 0);
+		frames.add(&p_frame.fadein, &p_frame.fadein_pitch, "fadein_pitch", 100, 0);
+		frames.add(&p_frame.fade, &p_frame.fadeout, "fadeout", 0, 0);
+		frames.add(&p_frame.fadeout, &p_frame.fadeout_vol, "fadeout_vol", 100, 0);
+		frames.add(&p_frame.fadeout, &p_frame.fadeout_pitch, "fadeout_pitch" ,100, 0);
+		frames.add(&p_frame.fade, &p_frame.fadechange, "fadechange", 0, 0);
+		frames.add(&p_frame.fadechange, &p_frame.fadechange_vol, "fadechange_vol", 100, 0);
+		frames.add(&p_frame.fadechange, &p_frame.fadechange_pitch, "fadechange_pitch", 100, 0);
+
+		//set_parent(frame *self, bool mode, int gap)
+		frames.set_parent(&p_frame.root, 1, 0);
+		frames.set_parent(&p_frame.hostpar, 1, 0);
+		frames.set_parent(&p_frame.fadein, 1, 0);
+		frames.set_parent(&p_frame.fadeout, 1, 0);
+		frames.set_parent(&p_frame.fadechange, 1, 0);
+		frames.set_parent(&p_frame.fadechange, 1, 0);
 
 		frames.get_length(&p_frame.root); //全フレームのlength等取得
+	}
+};
+
+//ウィンドウイベント処理クラス
+class WIN_EVENT {
+public:
+	//変数宣言
+	HWND hwnd; //現在指定されているウィンドウハンドル
+	HWND m_hwnd; //マウス下の最前面ウィンドウハンドル
+	POINT mouse_pos; //マウス座標
+	MSG msg; //ウィンドウメッセージ代入変数
+
+	//関数宣言
+	//ウィンドウハンドル設定関数
+	void SetHwnd(HWND h) {
+		hwnd = h;
+		return;
+	}
+	//マウスが自ウィンドウを操作しているかどうかの判定
+	bool GetMouseOnWindow() {
+		GetMousePos();
+		return 0;
+	}
+	//マウスが指定範囲内を操作しているかどうかの判定
+	bool GetMouseOnRect() {
+		GetMousePos();
+		return 0;
+	}
+	//マウスホイール変化量取得関数
+	int GetScroll() {
+
+		return 0;
+	}
+	//マウス座標取得関数
+	void GetMousePos() {
+		GetMessage(&msg, NULL, 0, 0);
+		//mouse_pos = ; //マウス座標代入
+		return;
 	}
 };
 
