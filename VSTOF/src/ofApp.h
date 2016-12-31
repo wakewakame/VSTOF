@@ -328,9 +328,7 @@ public:
 	//関数宣言
 	Parameteres() { //全パラメーター分のフレーム作成
 		//フレーム生成
-		//frames.add(frame *parent, frame *self, std::string name, bool mode, int gap, int length, bool lock)
-		//->
-		//frames.add(frame *parent, frame *self, std::string name, int length, bool lock, bool mode, int gap)
+		//frames.add(frame *parent, frame *self, std::string name, int length, bool lock)
 		frames.add(nullptr, &p_frame.root, "root", 0, 0);
 		frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
 		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
