@@ -368,7 +368,7 @@ public:
 		frames.set_parent(&p_frame.fadeout, 1, 0);
 		frames.set_parent(&p_frame.fadechange, 1, 0);
 		frames.set_parent(&p_frame.fadechange, 1, 0);
-
+		
 		frames.get_length(&p_frame.root); //‘SƒtƒŒ[ƒ€‚Ìlength“™æ“¾
 	}
 };
