@@ -53,6 +53,92 @@ struct ShareMemData {
 	HWND Host; //描画先ハンドル
 	VSTParameteres para; //VSTのパラメーター群
 };
+//アニメーション変数管理クラス
+class Animation {
+private:
+	//変数宣言
+	double fps; //フレームレート
+	std::vector<bool> motion; //アニメーションが開始されていれば1,それ意外は0
+	std::vector<double> len; //アニメーションする時間(単位はsec)
+	std::vector<double> t; //fpsに依存しない経過時間(0.0<=t<=len)
+	std::vector<char> type; //アニメーションの変化の種類(0<=val)
+	std::vector<bool*> swp; //sw=0ならtを0に近づけ、逆なら逆
+	std::vector<bool> bsw; //前フレームのときのsw1
+
+public:
+	//変数宣言
+	std::vector<double> m; //モーション座標(基本的に 0.0<=m<=1.0)
+	std::vector<double> p; //(p/1.0)=(t/len)
+
+	//関数宣言
+	//fps指定
+	void set_fps(double frame_rate) {
+		fps = frame_rate;
+	}
+	//アニメーション配列の長さ
+	int get_len() {
+		return t.size();
+	}
+	//アニメーション変数の追加
+	void add(double length, char effect_type, bool *sw) {
+		motion.push_back(0);
+		len.push_back(length);
+		t.push_back(0.0);
+		m.push_back(0.0);
+		p.push_back(0.0);
+		type.push_back(effect_type);
+		swp.push_back(sw);
+		bsw.push_back(*sw);
+	}
+	//毎フレーム呼び出し関数
+	void loop() {
+		for (int i = 0; i < t.size(); i++) {
+			//前フレームとの値が違う場合、アニメーション開始
+			if (*swp[i] != bsw[i]) {
+				motion[i] = 1;
+				bsw[i] = *swp[i];
+			}
+			//アニメーション処理
+			if (motion[i]) {
+				//経過時間計算
+				if (*swp[i]) {
+					t[i] += (1.0 / fps);
+					if (t[i] >= len[i]) {
+						t[i] = len[i];
+						motion[i] = 0;
+					}
+				}else{
+					t[i] -= (1.0 / fps);
+					if (t[i] <= 0.0) {
+						t[i] = 0.0;
+						motion[i] = 0;
+					}
+				}
+				//モーション計算
+				p[i] = t[i] / len[i];
+				switch (type[i]) {
+				case 0:
+					//y=x
+					m[i] = p[i];
+					break;
+				case 1:
+					//y=x^2
+					m[i] = pow(p[i],2);
+					break;
+				case 2:
+					//y=-(x-1)^2+1
+					m[i] = 1.0 - pow(p[i] - 1.0, 2);
+					break;
+				case 3:
+					//y=3*(x^2)-2*(x^3)
+					//x=0でyが極小値0となり、x=1でyが極大値1となる三次関数
+					m[i] = 3 * pow(p[i], 2) - 2 * pow(p[i], 3);
+					break;
+				}
+			}
+		}
+	}
+};
 //フレーム構造体
 struct frame {
 	frame *parent; //親フレームのポインタ
@@ -67,6 +153,7 @@ struct frame {
 	int length; //全フレームが初期値サイズ時の自フレームのサイズ
 	bool lock; //各子フレームの長さ(mode=0なら縦幅,mode=1なら横幅)の固定on/off
 	int lock_length; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
+	Animation animation; //アニメーション変数配列
 };
 //パラメーター値構造体
 struct VSTParameteresFrames {
@@ -362,12 +449,12 @@ public:
 		frames.add(&p_frame.fadechange, &p_frame.fadechange_pitch, "fadechange_pitch", 100, 0);
 
 		//set_parent(frame *self, bool mode, int gap)
-		frames.set_parent(&p_frame.root, 1, 0);
-		frames.set_parent(&p_frame.hostpar, 1, 0);
-		frames.set_parent(&p_frame.fadein, 1, 0);
-		frames.set_parent(&p_frame.fadeout, 1, 0);
-		frames.set_parent(&p_frame.fadechange, 1, 0);
-		frames.set_parent(&p_frame.fadechange, 1, 0);
+		frames.set_parent(&p_frame.root, 1, 2);
+		frames.set_parent(&p_frame.hostpar, 1, 2);
+		frames.set_parent(&p_frame.fadein, 1, 2);
+		frames.set_parent(&p_frame.fadeout, 1, 2);
+		frames.set_parent(&p_frame.fadechange, 1, 2);
+		frames.set_parent(&p_frame.fadechange, 1, 2);
 		
 		frames.get_length(&p_frame.root); //全フレームのlength等取得
 	}
@@ -377,45 +464,50 @@ public:
 class WIN_EVENT {
 public:
 	//変数宣言
-	HWND hwnd; //現在指定されているウィンドウハンドル
-	HWND m_hwnd; //マウス下の最前面ウィンドウハンドル
-	POINT mouse_pos; //マウス座標
-	MSG msg; //ウィンドウメッセージ代入変数
+	POINT mouse; //現在のマウス座標
+	bool l_click; //現在の左クリック情報(押されていたら1)
+	bool b_l_click; //前フレームのl_click変数の内容
 
 	//関数宣言
-	//ウィンドウハンドル設定関数
-	void SetHwnd(HWND h) {
-		hwnd = h;
-		return;
-	}
-	//マウスが自ウィンドウを操作しているかどうかの判定
-	bool GetMouseOnWindow() {
-		GetMousePos();
+	//指定RECT内に存在するかどうか
+	bool in(RECT area) {
+		if (
+			(area.left <= mouse.x) &&
+			(area.top <= mouse.y) &&
+			(area.right >= mouse.x) &&
+			(area.bottom >= mouse.y)
+		) {
+			return 1;
+		}
 		return 0;
 	}
-	//マウスが指定範囲内を操作しているかどうかの判定
-	bool GetMouseOnRect() {
-		GetMousePos();
-		return 0;
+	//マウスが左クリックされたかどうか
+	bool get_l_click() {
+		return (l_click == 1 && b_l_click == 0);
 	}
-	//マウスホイール変化量取得関数
-	int GetScroll() {
-
-		return 0;
+	//指定RECT内でマウスがクリックされたかどうか
+	bool l_click_in(RECT area) {
+		return (in(area) && get_l_click());
 	}
-	//マウス座標取得関数
-	void GetMousePos() {
-		GetMessage(&msg, NULL, 0, 0);
-		//mouse_pos = ; //マウス座標代入
-		return;
+	//毎フレーム呼び出し関数
+	void loop() {
+		b_l_click = l_click;
 	}
 };
 
 //GUIクラス
 class GUI {
 public:
+	//変数宣言
+	double move; //汎用アニメーション変数
+	double fps; //フレームレート
+
+	//コンストラクト
+	WIN_EVENT win_event;
+
 	//関数宣言
-	float percent(float a, float a_min, float a_max, float b_min, float b_max) { //単位変換関数
+	//単位変換関数
+	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
 		float b;
 		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
 		return b;
@@ -424,19 +516,22 @@ public:
 	void reset() {
 		ofBackground(30, 30, 30);
 	}
+	//フレームレート指定
+	void set_fps(double frame_rate) {
+		fps = frame_rate;
+	}
 	//線のボックス描画関数
-	void LIneBox(RECT pos) {
-		ofLine(pos.left, pos.top, pos.right, pos.top);
-		ofLine(pos.right, pos.top, pos.right, pos.bottom);
-		ofLine(pos.right, pos.bottom, pos.left, pos.bottom);
-		ofLine(pos.left, pos.bottom, pos.left, pos.top);
+	void LineBox(RECT pos,int thick) {
+		ofRect(pos.left, pos.top, pos.right - pos.left, thick); //上
+		ofRect(pos.right - thick, pos.top + thick, thick, (pos.bottom - pos.top) - 2*thick); //右
+		ofRect(pos.left, pos.bottom - thick, pos.right - pos.left, thick); //下
+		ofRect(pos.left, pos.top + thick, thick, (pos.bottom - pos.top) - 2*thick); //左
 	}
 	//フレームの境界線描画
 	void FrameLine(frame *root) {
-		ofSetLineWidth(1.0f);
-		ofSetColor(255, 255, 255, 240);
+		ofSetColor(255, 255, 255, 255);
 		//自フレーム描画
-		LIneBox(root->pos);
+		LineBox(root->pos,1);
 		//自フレームに子フレームがあれば全部描画
 		if (root->num_child != 0) {
 			for (int i = 0; i < root->num_child; i++) {
@@ -460,11 +555,84 @@ public:
 			ofDrawBitmapString(root->name, root->pos.left + 4, root->pos.top + 12);
 		}
 	}
-	void rawwave(frame *f, RECTF len, float *samples, int num_sample, float *allrawwave, int num_allrawwave, POINT rlen) { //生波形データの使用部分選択
-
+	void rawwave(frame *f, float *samples, int num_sample) {
+		for (int i = 0; i < num_sample-1; i++) {
+			ofLine(
+				percent(i, 0, num_sample, f->pos.left, f->pos.right),
+				percent(samples[i], -1.0f, 1.0f, (float)f->pos.bottom, (float)f->pos.top),
+				percent(i+1, 0, num_sample, f->pos.left, f->pos.right),
+				percent(samples[i+1], -1.0f, 1.0f, (float)f->pos.bottom, (float)f->pos.top)
+			);
+		}
 	}
-	void loop() { //毎フレーム呼び出し関数
-
+	//スイッチUI
+	void sw(frame *f, bool *sw) {
+		bool sw2[3];
+		//アニメーション変数確認
+		if (f->animation.get_len() == 0) {
+			f->animation.add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
+			f->animation.add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
+			f->animation.add(0.15, 3, sw); //クリックされたとき
+			f->animation.set_fps(fps); //fps指定
+		}
+		//スイッチイベント確認
+		//クリックされたとき
+		if (win_event.l_click_in({
+			f->pos.left + 10,
+			f->pos.top + 20,
+			f->pos.left + 70,
+			f->pos.top + 80
+		})) {
+			*sw = !(*sw);
+		}
+		//マウスをかざしたとき
+		sw2[0] = win_event.in({
+			f->pos.left + 10,
+			f->pos.top + 20,
+			f->pos.left + 70,
+			f->pos.top + 80
+		});
+		sw2[1] = (f->animation.p[0] >= 0.5);
+		//アニメーション確認
+		f->animation.loop();
+		//描画
+		ofSetColor(255, 255, 255, 255);
+		LineBox({
+			f->pos.left + 10,
+			f->pos.top + 20,
+			f->pos.left + 70,
+			f->pos.top + 80
+		},20);
+		ofSetColor(0, 128, 198, 255);
+		move = 15.0*f->animation.m[0];
+		ofRect(
+			f->pos.left + 40 - (int)move,
+			f->pos.top + 50 - (int)move,
+			(int)move * 2,
+			(int)move * 2
+		);
+		ofSetColor(255, 255, 255, 255);
+		move = 15.0*f->animation.m[1];
+		ofRect(
+			f->pos.left + 40 - (int)move,
+			f->pos.top + 50 - (int)move,
+			(int)move * 2,
+			(int)move * 2
+		);
+		ofSetColor(0, 128, 198, (int)(255.0*f->animation.p[1]));
+		ofDrawBitmapString("click", f->pos.left + 21, f->pos.top + 53);
+		ofSetColor(0, 128, 198, 255);
+		move = 15.0*f->animation.m[2];
+		ofRect(
+			f->pos.left + 40 - (int)move,
+			f->pos.top + 50 - (int)move,
+			(int)move * 2,
+			(int)move * 2
+		);
+	}
+	//毎フレーム呼び出し関数
+	void loop() {
+		win_event.loop();
 	}
 	/*
 	追加予定の関数
@@ -482,6 +650,7 @@ public:
 	//変数宣言
 	float fps;
 	RECT win_size;
+	bool a; //デバッグ用
 
 	//コンストラクト
 	Parameteres para;
@@ -499,19 +668,25 @@ public:
 		para.p_frame.root.pos.bottom = win_info.size.y;
 		fps = win_info.fps;
 		para.frames.resize(&para.p_frame.root, para.p_frame.root.pos); //全フレームの自動配置
+		para.p_frame.all.pos.bottom = para.p_frame.all.length;
+		para.frames.resize(&para.p_frame.all, para.p_frame.all.pos);
+		gui.set_fps(fps);
 		return 0;
 	}
 	void loop() { //ループ中に呼び出す関数
 		//画面初期化
 		gui.reset();
-		//GUIクラスの毎フレーム呼び出し関数
-		gui.loop();
 		//フレームの境界線描画
 		gui.FrameLine(&para.p_frame.root);
 		//フレームの名称描画
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
-
+		{
+			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave);
+			gui.sw(&para.p_frame.raw_wave_para, &a);
+		}
+		//毎フレーム呼び出し関数
+		gui.loop();
 	}
 };
 
