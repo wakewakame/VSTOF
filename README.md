@@ -1,26 +1,16 @@
-Name
+VSTOF
 ====
 
-Overview
+VSTiの描画部分
 
-## Description
+## 概要
+VSTiプラグインの設定画面です。
+VSTiのプロセスとは別プロセスで起動します。
+VSTiがホストプロセスで、このプログラムとはメモリ共有で通信しています。
+描画にはOpenFrameworksを用いています。
+アニメーションエフェクトを多く使用したいので、UIのパーツから作っています。
 
-## Demo
+## 進行状況
 
-## VS. 
-
-## Requirement
-
-## Usage
-
-## Install
-
-## Contribution
-
-## Licence
-
-[MIT](https://github.com/tcnksm/tool/blob/master/LICENCE)
-
-## Author
-
-[tcnksm](https://github.com/tcnksm)
+2017/01/29
+最近ボタンができた(∩´∀｀)∩
