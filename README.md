@@ -23,3 +23,5 @@ VSTiがホストプロセスで、このプログラムとはメモリ共有で�
 2017/02/01:  
 波形描画関数できた(∩´∀｀)∩  
 ![グラフ](https://raw.githubusercontent.com/wakewakame/VSTOF/master/Demo/wave.gif)  
+波形がたまにｶﾞｸｯってなるのはホストプログラムの仕様  
+原因はわかってるから、こっちがある程度完成してから治す  
