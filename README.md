@@ -20,5 +20,6 @@ VSTiがホストプロセスで、このプログラムとはメモリ共有で�
 全然関係ないけど明日から5日間受験や  
 でも多分更新する  
   
-2017/02/01:波形描画関数できた(∩´∀｀)∩  
+2017/02/01:  
+波形描画関数できた(∩´∀｀)∩  
 ![グラフ](https://raw.githubusercontent.com/wakewakame/VSTOF/master/Demo/wave.gif)  
