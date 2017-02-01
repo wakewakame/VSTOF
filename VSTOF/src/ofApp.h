@@ -512,6 +512,9 @@ public:
 		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
 		return b;
 	}
+	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
+		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
+	}
 	//背景初期化
 	void reset() {
 		ofBackground(30, 30, 30);
@@ -555,14 +558,45 @@ public:
 			ofDrawBitmapString(root->name, root->pos.left + 4, root->pos.top + 12);
 		}
 	}
-	void rawwave(frame *f, float *samples, int num_sample) {
-		for (int i = 0; i < num_sample-1; i++) {
-			ofLine(
-				percent(i, 0, num_sample, f->pos.left, f->pos.right),
-				percent(samples[i], -1.0f, 1.0f, (float)f->pos.bottom, (float)f->pos.top),
-				percent(i+1, 0, num_sample, f->pos.left, f->pos.right),
-				percent(samples[i+1], -1.0f, 1.0f, (float)f->pos.bottom, (float)f->pos.top)
-			);
+	//グラフ基盤UI(フレーム,波形配列,サンプル数,描画モード)
+	void rawwave(frame *f, float *samples, int num_sample ,char mode) {
+		//描画効率化のため、ピクセルの数に合わせて描画
+		int index = 0; //配列から値を参照するときのインデックス
+		float percentage = 0.0f;
+		float height; //今描画する波の高さ
+		for (int i = 0; i < f->size.x; i++) {
+			percentage = percent((float)i, 0.0f, (float)f->size.x, 0.0f, (float)num_sample-1); //一時代入
+			index = (int)percentage; //波形配列のインデックス算出
+			percentage = percentage - (float)index; //int,floatの性質上必ず正の数になる
+			//(念の為)index+1>=num_sampleになったらループ脱出
+			if (index+1 >= num_sample) {
+				break;
+			}
+			//今描画する波の高さ
+			height =
+				percent(samples[index], -1.0f, 1.0f, 0.0f, (float)f->size.y) * (1.0f - percentage) +
+				percent(samples[index + 1], -1.0f, 1.0f, 0.0f, (float)f->size.y) * (percentage);
+			//f->size.x<num_sampleの時は塗りつぶし処理特殊
+			switch (mode) {
+			case 0: //塗りつぶしなし
+				ofRect(
+					f->pos.left + i,
+					f->pos.bottom - height,
+					1,
+					1
+				);
+				break;
+			case 1: //y=0.0を中心に塗りつぶし
+				break;
+			case 2: //波形から下を塗りつぶし
+				ofRect(
+					f->pos.left + i,
+					f->pos.bottom - height,
+					1,
+					height
+				);
+				break;
+			}
 		}
 	}
 	//スイッチUI
@@ -683,7 +717,7 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave);
+			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave,2);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 		}
 		//毎フレーム呼び出し関数
@@ -768,7 +802,11 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	WINDOW_INFO win_info; //ウィンドウ情報保持変数初期化
+	//FBOコンストラクト
+	ofFbo fbo;
+
+	//ウィンドウ情報保持変数初期化
+	WINDOW_INFO win_info;
 
 						  //コンストラクト
 	AllProcess app;

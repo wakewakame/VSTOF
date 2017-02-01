@@ -75,3 +75,25 @@ Drawクラスで毎フレーム呼び出すだけで
 そうすることにより、アニメーション変数などの
 管理が簡単かつわかりやすくなる為。
 */
+
+//塗りつぶしの仕様変更について
+/*
+f->size.x<num_sampleの時は塗りつぶし処理特殊
+指定範囲内の多角形描画
+A->B
+ ↑
+percent変換
+```
+float *samples; //波形配列
+int height; // 描画高さ
+for(int j = 0; j < width; j++){
+	percent(
+		i,
+		0,
+		width,
+		(int)samples[index],
+		(int)samples[index+1]
+	);
+}
+```
+*/
