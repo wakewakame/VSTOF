@@ -577,26 +577,34 @@ public:
 				percent(samples[index], -1.0f, 1.0f, 0.0f, (float)f->size.y) * (1.0f - percentage) +
 				percent(samples[index + 1], -1.0f, 1.0f, 0.0f, (float)f->size.y) * (percentage);
 			//f->size.x<num_sampleÇÃéûÇÕìhÇËÇ¬Ç‘Çµèàóùì¡éÍ
-			switch (mode) {
-			case 0: //ìhÇËÇ¬Ç‘ÇµÇ»Çµ
-				ofRect(
-					f->pos.left + i,
-					f->pos.bottom - height,
-					1,
-					1
-				);
-				break;
-			case 1: //y=0.0ÇíÜêSÇ…ìhÇËÇ¬Ç‘Çµ
-				break;
-			case 2: //îgå`Ç©ÇÁâ∫ÇìhÇËÇ¬Ç‘Çµ
-				ofRect(
-					f->pos.left + i,
-					f->pos.bottom - height,
-					1,
-					height
-				);
-				break;
+			if (i % 2 == 0) {
+				switch (mode) {
+				case 0: //ìhÇËÇ¬Ç‘ÇµÇ»Çµ
+					break;
+				case 1: //y=0.0ÇíÜêSÇ…ìhÇËÇ¬Ç‘Çµ
+					ofRect(
+						f->pos.left + i,
+						f->pos.bottom - height,
+						1,
+						height - f->size.y / 2.0f
+					);
+					break;
+				case 2: //îgå`Ç©ÇÁâ∫ÇìhÇËÇ¬Ç‘Çµ
+					ofRect(
+						f->pos.left + i,
+						f->pos.bottom - height,
+						1,
+						height
+					);
+					break;
+				}
 			}
+			ofRect(
+				f->pos.left + i,
+				f->pos.bottom - height,
+				1,
+				1
+			);
 		}
 	}
 	//ÉXÉCÉbÉ`UI
