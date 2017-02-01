@@ -13,4 +13,7 @@ VSTiがホストプロセスで、このプログラムとはメモリ共有で�
 
 ## 進行状況
 2017/01/29:最近ボタンができた(∩´∀｀)∩  
-![ボタン](https://raw.githubusercontent.com/wakewakame/VSTOF/master/Demo/button.gif)
+![ボタン](https://raw.githubusercontent.com/wakewakame/VSTOF/master/Demo/button.gif)  
+2017/01/30:全然関係ないけど明日から受験やで  
+2017/02/01:波形描画関数できた(∩´∀｀)∩  
+![グラフ](https://raw.githubusercontent.com/wakewakame/VSTOF/master/Demo/wave.gif)  
