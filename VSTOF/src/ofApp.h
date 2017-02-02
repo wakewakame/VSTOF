@@ -574,8 +574,8 @@ public:
 			}
 			//¡•`‰æ‚·‚é”g‚Ì‚‚³
 			height =
-				percent(samples[index], -1.0f, 1.0f, 0.0f, (float)f->size.y) * (1.0f - percentage) +
-				percent(samples[index + 1], -1.0f, 1.0f, 0.0f, (float)f->size.y) * (percentage);
+				percent(samples[index], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (1.0f - percentage) +
+				percent(samples[index + 1], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (percentage);
 			//f->size.x<num_sample‚ÌŽž‚Í“h‚è‚Â‚Ô‚µˆ—“ÁŽê
 			if (i % 2 == 0) {
 				switch (mode) {
@@ -584,24 +584,24 @@ public:
 				case 1: //y=0.0‚ð’†S‚É“h‚è‚Â‚Ô‚µ
 					ofRect(
 						f->pos.left + i,
-						f->pos.bottom - height,
+						f->pos.bottom - f->size.y / 2.0f - height,
 						1,
-						height - f->size.y / 2.0f
+						height
 					);
 					break;
 				case 2: //”gŒ`‚©‚ç‰º‚ð“h‚è‚Â‚Ô‚µ
 					ofRect(
 						f->pos.left + i,
-						f->pos.bottom - height,
+						f->pos.bottom - f->size.y / 2.0f - height,
 						1,
-						height
+						f->size.y / 2.0f + height
 					);
 					break;
 				}
 			}
 			ofRect(
 				f->pos.left + i,
-				f->pos.bottom - height,
+				f->pos.bottom - f->size.y / 2.0f - height,
 				1,
 				1
 			);
