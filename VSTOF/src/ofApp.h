@@ -578,6 +578,7 @@ public:
 				percent(samples[index + 1], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (percentage);
 			//f->size.x<num_sampleの時は塗りつぶし処理特殊
 			if (i % 2 == 0) {
+				ofSetColor(255, 255, 255, 255);
 				switch (mode) {
 				case 0: //塗りつぶしなし
 					break;
@@ -597,8 +598,24 @@ public:
 						f->size.y / 2.0f + height
 					);
 					break;
+				case 3: //上限ライン描画
+					ofSetColor(255, 0, 0, 255);
+					ofRect(
+						f->pos.left + i,
+						f->pos.bottom - f->size.y / 2.0f - f->size.y * 0.7f / 2.0f,
+						1,
+						1
+					);
+					ofRect(
+						f->pos.left + i,
+						f->pos.bottom - f->size.y / 2.0f + f->size.y * 0.7f / 2.0f,
+						1,
+						1
+					);
+					break;
 				}
 			}
+			ofSetColor(255, 255, 255, 255);
 			ofRect(
 				f->pos.left + i,
 				f->pos.bottom - f->size.y / 2.0f - height,
@@ -725,7 +742,7 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave,2);
+			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave,3);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 		}
 		//毎フレーム呼び出し関数
