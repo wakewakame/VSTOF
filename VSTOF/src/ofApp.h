@@ -171,9 +171,9 @@ public:
 	int add(int x, int y) {
 		//カラーフレームバッファ
 		color.push_back(fbo_); //配列にカラーフレームバッファクラス追加
-		color[num].allocate(x, y, GL_RGBA); //カラーフレームバッファ生成
+		color[num].allocate(x, y, GL_RGB); //カラーフレームバッファ生成
 		color[num].begin();
-		ofClear(255, 255, 255, 255); //カラーフレームバッファ初期化
+		ofClear(255, 255, 255, 0); //カラーフレームバッファ初期化
 		color[num].end();
 		//アルファフレームバッファ
 		alpha.push_back(fbo_); //配列にアルファフレームバッファクラス追加
@@ -709,16 +709,18 @@ public:
 		}
 		//フレームバッファに描画
 		f->fbo.change_c(0);
-		ofSetColor(255, 0, 0, 255);
+		ofSetColor(0, 0, 255, 128);
 		ofRect(0, 0, 30, 60);
 		ofSetColor(0, 0, 255, 255);
 		ofRect(30, 0, 30, 60);
 		f->fbo.change_c(-1);
 		f->fbo.change_a(0);
-		ofSetColor(255);
-		ofRect(0, 0, 60, 60);
 		ofSetColor(0);
-		ofRect(20, 20, 20, 20);
+		ofRect(0, 0, 60, 20);
+		ofSetColor(128);
+		ofRect(0, 20, 60, 20);
+		ofSetColor(255);
+		ofRect(0, 40, 60, 20);
 		f->fbo.change_a(-1);
 		//スイッチイベント確認
 		//クリックされたとき
@@ -750,9 +752,7 @@ public:
 			f->pos.top + 80
 		},20);
 		*/
-		ofEnableBlendMode(OF_BLENDMODE_ALPHA); //加算合成モード
 		f->fbo.color[0].draw(f->pos.left + 10, f->pos.top + 20);
-		ofEnableBlendMode(OF_BLENDMODE_ALPHA); //アルファ合成モード
 		ofSetColor(0, 128, 198, 255);
 		move = 15.0*f->animation.m[0];
 		ofRect(
