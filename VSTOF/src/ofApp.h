@@ -142,38 +142,63 @@ public:
 //フレームバッファクラス
 class FBO {
 public:
+	//フレームバッファクラスの配列
+	std::vector<ofFbo> color;
+	std::vector<ofFbo> alpha;
+	//現在のフレームバッファの個数
+	int num;
 	//現在使用しているフレームバッファのインデックス(-1ならレンダーバッファ)
 	int now_index;
-	//フレームバッファクラスの配列
-	std::vector<ofFbo> fbo;
+	//仮フレームバッファクラスのコンストラクト
+	ofFbo fbo_;
 	//コンストラクタ
 	FBO() {
 		now_index = -1;
+		num = 0;
 	}
 	//デストラクタ
 	~FBO() {
 		if (now_index != -1) {
-			fbo[now_index].end();
+			color[now_index].end();
+			alpha[now_index].end();
 		}
 	}
 	//フレームバッファの追加
 	int add(int x, int y) {
-		int index = fbo.size(); //新しく生成するフレームバッファのインデックス(-1ならレンダーバッファ)
-		ofFbo fbo_; //仮フレームバッファクラスのコンストラクト
-		fbo.push_back(fbo_); //配列にフレームバッファクラス追加
-		fbo[index].allocate(x, y, GL_RGBA); //フレームバッファ生成
-		fbo[index].begin();
-		ofClear(255, 255, 255, 0); //フレームバッファ初期化
-		fbo[index].end();
-		return index;
+		//カラーフレームバッファ
+		color.push_back(fbo_); //配列にカラーフレームバッファクラス追加
+		color[num].allocate(x, y, GL_RGBA); //カラーフレームバッファ生成
+		color[num].begin();
+		ofClear(255, 255, 255, 255); //カラーフレームバッファ初期化
+		color[num].end();
+		//アルファフレームバッファ
+		alpha.push_back(fbo_); //配列にアルファフレームバッファクラス追加
+		alpha[num].allocate(x, y, GL_ALPHA); //アルファフレームバッファ生成
+		alpha[num].begin();
+		ofClear(255); //アルファフレームバッファ初期化
+		alpha[num].end();
+		num += 1;
+		return num - 1;
 	}
-	//フレームバッファの切り替え(index=-1ならレンダーバッファ)
-	void change(int index) {
+	//カラーフレームバッファの切り替え(index=-1ならレンダーバッファ)
+	void change_c(int index) {
 		if (now_index != -1) {
-			fbo[now_index].end();
+			color[now_index].end();
 		}
 		if (index != -1) {
-			fbo[index].begin();
+			color[index].begin();
+		}
+		now_index = index;
+	}
+	//アルファフレームバッファの切り替え(index=-1ならレンダーバッファ)
+	void change_a(int index) {
+		if (now_index != -1) {
+			alpha[now_index].end();
+			//カラーフレームバッファにマスク適応
+			color[now_index].getTexture().setAlphaMask(alpha[now_index].getTexture());
+		}
+		if (index != -1) {
+			alpha[index].begin();
 		}
 		now_index = index;
 	}
@@ -557,7 +582,7 @@ public:
 	}
 	//背景初期化
 	void reset() {
-		ofBackground(30, 30, 30);
+		ofBackground(30, 255, 30);
 	}
 	//フレームレート指定
 	void set_fps(double frame_rate) {
@@ -674,6 +699,23 @@ public:
 			f->animation.add(0.15, 3, sw); //クリックされたとき
 			f->animation.set_fps(fps); //fps指定
 		}
+		//フレームバッファを追加
+		if (f->fbo.num == 0) {
+			f->fbo.add(60, 60);
+		}
+		//フレームバッファに描画
+		f->fbo.change_c(0);
+		ofSetColor(255, 0, 0, 255);
+		ofRect(0, 0, 30, 60);
+		ofSetColor(0, 0, 255, 255);
+		ofRect(30, 0, 30, 60);
+		f->fbo.change_c(-1);
+		f->fbo.change_a(0);
+		ofSetColor(255);
+		ofRect(0, 0, 60, 60);
+		ofSetColor(0);
+		ofRect(20, 20, 20, 20);
+		f->fbo.change_a(-1);
 		//スイッチイベント確認
 		//クリックされたとき
 		if (win_event.l_click_in({
@@ -695,6 +737,7 @@ public:
 		//アニメーション確認
 		f->animation.loop();
 		//描画
+		/*
 		ofSetColor(255, 255, 255, 255);
 		LineBox({
 			f->pos.left + 10,
@@ -702,6 +745,10 @@ public:
 			f->pos.left + 70,
 			f->pos.top + 80
 		},20);
+		*/
+		ofEnableBlendMode(OF_BLENDMODE_ALPHA); //加算合成モード
+		f->fbo.color[0].draw(f->pos.left + 10, f->pos.top + 20);
+		ofEnableBlendMode(OF_BLENDMODE_ALPHA); //アルファ合成モード
 		ofSetColor(0, 128, 198, 255);
 		move = 15.0*f->animation.m[0];
 		ofRect(
