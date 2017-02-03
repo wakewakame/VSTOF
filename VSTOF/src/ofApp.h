@@ -139,6 +139,45 @@ public:
 		}
 	}
 };
+//フレームバッファクラス
+class FBO {
+public:
+	//現在使用しているフレームバッファのインデックス(-1ならレンダーバッファ)
+	int now_index;
+	//フレームバッファクラスの配列
+	std::vector<ofFbo> fbo;
+	//コンストラクタ
+	FBO() {
+		now_index = -1;
+	}
+	//デストラクタ
+	~FBO() {
+		if (now_index != -1) {
+			fbo[now_index].end();
+		}
+	}
+	//フレームバッファの追加
+	int add(int x, int y) {
+		int index = fbo.size(); //新しく生成するフレームバッファのインデックス(-1ならレンダーバッファ)
+		ofFbo fbo_; //仮フレームバッファクラスのコンストラクト
+		fbo.push_back(fbo_); //配列にフレームバッファクラス追加
+		fbo[index].allocate(x, y, GL_RGBA); //フレームバッファ生成
+		fbo[index].begin();
+		ofClear(255, 255, 255, 0); //フレームバッファ初期化
+		fbo[index].end();
+		return index;
+	}
+	//フレームバッファの切り替え(index=-1ならレンダーバッファ)
+	void change(int index) {
+		if (now_index != -1) {
+			fbo[now_index].end();
+		}
+		if (index != -1) {
+			fbo[index].begin();
+		}
+		now_index = index;
+	}
+};
 //フレーム構造体
 struct frame {
 	frame *parent; //親フレームのポインタ
@@ -154,6 +193,7 @@ struct frame {
 	bool lock; //各子フレームの長さ(mode=0なら縦幅,mode=1なら横幅)の固定on/off
 	int lock_length; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
 	Animation animation; //アニメーション変数配列
+	FBO fbo;
 };
 //パラメーター値構造体
 struct VSTParameteresFrames {
