@@ -142,6 +142,10 @@ public:
 //フレームバッファクラス
 class FBO {
 public:
+	/*
+	///メモ///
+	アルファフレームバッファは必要なときだけ生成する
+	*/
 	//フレームバッファクラスの配列
 	std::vector<ofFbo> color;
 	std::vector<ofFbo> alpha;
