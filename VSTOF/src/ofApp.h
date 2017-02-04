@@ -171,7 +171,7 @@ public:
 	int add(int x, int y) {
 		//カラーフレームバッファ
 		color.push_back(fbo_); //配列にカラーフレームバッファクラス追加
-		color[num].allocate(x, y, GL_RGB); //カラーフレームバッファ生成
+		color[num].allocate(x, y, GL_RGBA); //カラーフレームバッファ生成
 		color[num].begin();
 		ofClear(255, 255, 255, 0); //カラーフレームバッファ初期化
 		color[num].end();
@@ -179,7 +179,7 @@ public:
 		alpha.push_back(fbo_); //配列にアルファフレームバッファクラス追加
 		alpha[num].allocate(x, y, GL_ALPHA); //アルファフレームバッファ生成
 		alpha[num].begin();
-		ofClear(255); //アルファフレームバッファ初期化
+		ofClear(0, 0, 0, 255); //アルファフレームバッファ初期化
 		alpha[num].end();
 		num += 1;
 		return num - 1;
@@ -199,10 +199,15 @@ public:
 		if (now_index != -1) {
 			alpha[now_index].end();
 			//カラーフレームバッファにマスク適応
-			color[now_index].getTexture().setAlphaMask(alpha[now_index].getTexture());
+			color[now_index].begin();
+			glBlendFuncSeparate(GL_ZERO, GL_ONE, GL_ONE, GL_ZERO);
+			alpha[now_index].draw(0, 0);
+			color[now_index].end();
+			ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 		}
 		if (index != -1) {
 			alpha[index].begin();
+			glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ZERO);
 		}
 		now_index = index;
 	}
@@ -715,11 +720,12 @@ public:
 		ofRect(30, 0, 30, 60);
 		f->fbo.change_c(-1);
 		f->fbo.change_a(0);
-		ofSetColor(0);
+		ofClear(0, 0, 0, 255);
+		ofSetColor(0, 0, 0, 0);
 		ofRect(0, 0, 60, 20);
-		ofSetColor(128);
+		ofSetColor(0, 0, 0, 128);
 		ofRect(0, 20, 60, 20);
-		ofSetColor(255);
+		ofSetColor(0, 0, 0, 255);
 		ofRect(0, 40, 60, 20);
 		f->fbo.change_a(-1);
 		//スイッチイベント確認
