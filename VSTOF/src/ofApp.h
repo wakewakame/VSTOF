@@ -591,7 +591,7 @@ public:
 	}
 	//背景初期化
 	void reset() {
-		ofBackground(30, 255, 30);
+		ofBackground(30, 30, 30);
 	}
 	//フレームレート指定
 	void set_fps(double frame_rate) {
@@ -714,19 +714,20 @@ public:
 		}
 		//フレームバッファに描画
 		f->fbo.change_c(0);
-		ofSetColor(0, 0, 255, 128);
-		ofRect(0, 0, 30, 60);
-		ofSetColor(0, 0, 255, 255);
-		ofRect(30, 0, 30, 60);
+		ofSetColor(255, 255, 255, 255);
+		ofRect(0, 0, 60, 60);
 		f->fbo.change_c(-1);
 		f->fbo.change_a(0);
 		ofClear(0, 0, 0, 255);
+		
+		for (int i = 0; i < 60; i++) {
+			for (int j = 0; j < 60; j++) {
+				ofSetColor(0, 0, 0, 255 - (((i + j) / 20) % 2) * 128);
+				ofRect(j, i, j + 1, i + 1);
+			}
+		}
 		ofSetColor(0, 0, 0, 0);
-		ofRect(0, 0, 60, 20);
-		ofSetColor(0, 0, 0, 128);
-		ofRect(0, 20, 60, 20);
-		ofSetColor(0, 0, 0, 255);
-		ofRect(0, 40, 60, 20);
+		ofRect(20, 20, 20, 20);
 		f->fbo.change_a(-1);
 		//スイッチイベント確認
 		//クリックされたとき
