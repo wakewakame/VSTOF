@@ -1,11 +1,13 @@
 #include "ofApp.h"
 
 ofApp::ofApp(int argc, LPSTR arg[]) {
+	/*
 	if (argc = 2) {
 		lpCmdLine = arg[1];
 	}else{
 		ofExit(); //異常があれば終了
 	}
+	*/
 }
 
 //--------------------------------------------------------------
@@ -25,7 +27,13 @@ void ofApp::setup(){
 	//アルファチャンネルを使用可能に
 	ofEnableAlphaBlending();
 	//AllProcess初期化
+	/*
 	if (app.init(lpCmdLine, win_info)) {
+		ofExit(); //異常があれば終了
+	}
+	*/
+	LPSTR a = "VSTGUIMEM0";
+	if (app.init(a, win_info)) {
 		ofExit(); //異常があれば終了
 	}
 }

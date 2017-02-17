@@ -745,11 +745,17 @@ public:
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
-		if (f->childs.size() == 0) {
+		if (f->data.size() == 0) {
 			std::shared_ptr<frame> child(new frame);
+			f->data.push_back(&child);
 			frames.add(f, child.get(), "rawwave", 0, 0);
-			ofDrawBitmapString(child.use_count(), 4, 70);
+			f->childs[0]->pos.left = f->pos.left;
+			f->childs[0]->pos.top = f->pos.top;
+			f->childs[0]->pos.right = f->pos.right;
+			f->childs[0]->pos.bottom = f->pos.bottom;
 		}
+		ofSetColor(255, 255, 255, 255);
+		ofDrawBitmapString(((std::shared_ptr<frame>)(f->childs[0])).use_count(), f->pos.left + 30, f->pos.top + 30);
 		rawwave(f->childs[0], samples, num_sample, mode);
 	}
 	//パラメータカーソル描画関数
@@ -925,7 +931,7 @@ public:
 												  //変数代入
 		win_info = win_info2;
 		//共有メモリ関連
-		if (sm.Open((LPCTSTR)cmd)) {
+		if (sm.Open(cmd)) {
 			return 1;
 		}
 		if (sm.smd->Ready != nullptr) { //多重起動防止
@@ -960,7 +966,7 @@ public:
 		title = "";
 		title += "fps:";
 		title += std::to_string(ofGetFrameRate());
-		SetWindowText(win_info.hwnd, (LPCWSTR)title.c_str());
+		SetWindowText(win_info.hwnd, (LPSTR)title.c_str());
 		///debug///
 		return 0;
 	}
