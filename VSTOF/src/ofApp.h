@@ -617,6 +617,7 @@ public:
 
 	//コンストラクト
 	WIN_EVENT win_event;
+	Frames frames;
 
 	//関数宣言
 	//単位変換関数
@@ -678,6 +679,7 @@ public:
 		int index = 0; //配列から値を参照するときのインデックス
 		float percentage = 0.0f;
 		float height; //今描画する波の高さ
+		float b_height; //前フレームのheight
 		for (int i = 0; i < f->size.x; i++) {
 			percentage = percent((float)i, 0.0f, (float)f->size.x, 0.0f, (float)num_sample - 1); //一時代入
 			index = (int)percentage; //波形配列のインデックス算出
@@ -729,52 +731,73 @@ public:
 					break;
 				}
 			}
-			ofSetColor(255, 255, 255, 255);
-			ofRect(
-				f->pos.left + i,
-				f->pos.bottom - f->size.y / 2.0f - height,
-				1,
-				1
-			);
+			if (i > 0) {
+				ofSetColor(255, 255, 255, 255);
+				ofLine(
+					f->pos.left + i - 1,
+					f->pos.bottom - f->size.y / 2.0f - b_height,
+					f->pos.left + i,
+					f->pos.bottom - f->size.y / 2.0f - height
+				);
+			}
+			b_height = height; //前フレームのときのheight取得用
 		}
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
-		rawwave(f, samples, num_sample, mode);
+		if (f->childs.size() == 0) {
+			std::shared_ptr<frame> child(new frame);
+			frames.add(f, child.get(), "rawwave", 0, 0);
+			ofDrawBitmapString(child.use_count(), 4, 70);
+		}
+		rawwave(f->childs[0], samples, num_sample, mode);
+	}
+	//パラメータカーソル描画関数
+	void cursor(POINT pos,int size) {
+		ofSetColor(255, 255, 255, 128);
+		ofRect(pos.x-size/2,pos.y-size/2,size,size);
 	}
 	//スイッチUI
 	void sw(frame *f, bool *sw) {
 		//アニメーション変数確認
 		bool sw2[3];
 		bool loop = 1;
+		Animation *animation;
+		FBO *fbo;
 		if (f->data.size() == 0) {
 			//フレームにクラス追加
 			f->data.push_back(new Animation());
 			f->data.push_back(new FBO());
+			//ポインタ代入
+			animation = (Animation*)f->data[0];
+			fbo = (FBO*)f->data[1];
 			//クラス初期化
-			((Animation*)(f->data[0]))->add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
-			((Animation*)(f->data[0]))->add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
-			((Animation*)(f->data[0]))->add(0.15, 3, sw); //クリックされたとき
-			((Animation*)(f->data[0]))->add(1.0, 4, &loop);
-			((Animation*)(f->data[0]))->set_fps(fps); //fps指定
-			((FBO*)(f->data[1]))->add(60, 60);
+			animation->add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
+			animation->add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
+			animation->add(0.15, 3, sw); //クリックされたとき
+			animation->add(1.0, 4, &loop);
+			animation->set_fps(fps); //fps指定
+			fbo->add(60, 60);
+		}else{
+			animation = (Animation*)f->data[0];
+			fbo = (FBO*)f->data[1];
 		}
 		//フレームバッファに描画
-		((FBO*)(f->data[1]))->change_c(0);
+		fbo->change_c(0);
 		ofSetColor(255, 255, 255, 255);
 		ofRect(0, 0, 60, 60);
-		((FBO*)(f->data[1]))->change_c(-1);
-		((FBO*)(f->data[1]))->change_a(0);
+		fbo->change_c(-1);
+		fbo->change_a(0);
 		ofClear(0, 0, 0, 255);
 		for (int i = 0; i < 60; i++) {
 			for (int j = 0; j < 60; j++) {
-				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*((Animation*)(f->data[0]))->m[3])) / 20) % 2) * 128);
+				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*animation->m[3])) / 20) % 2) * 128);
 				ofRect(j, i, j + 1, i + 1);
 			}
 		}
 		ofSetColor(0, 0, 0, 0);
 		ofRect(20, 20, 20, 20);
-		((FBO*)(f->data[1]))->change_a(-1);
+		fbo->change_a(-1);
 		//スイッチイベント確認
 		//クリックされたとき
 		if (win_event.l_click_in({
@@ -792,14 +815,14 @@ public:
 			f->pos.left + 70,
 			f->pos.top + 80
 		});
-		sw2[1] = (((Animation*)(f->data[0]))->p[0] >= 0.5);
+		sw2[1] = (animation->p[0] >= 0.5);
 		//アニメーション確認
-		((Animation*)(f->data[0]))->loop();
+		animation->loop();
 		//描画
-		((FBO*)(f->data[1]))->draw_c(f->pos.left + 10, f->pos.top + 20, 0);
+		fbo->draw_c(f->pos.left + 10, f->pos.top + 20, 0);
 		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 		ofSetColor(0, 128, 198, 255);
-		move = 15.0*((Animation*)(f->data[0]))->m[0];
+		move = 15.0*animation->m[0];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
@@ -807,17 +830,17 @@ public:
 			(int)move * 2
 		);
 		ofSetColor(255, 255, 255, 255);
-		move = 15.0*((Animation*)(f->data[0]))->m[1];
+		move = 15.0*animation->m[1];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
 			(int)move * 2,
 			(int)move * 2
 		);
-		ofSetColor(0, 128, 198, (int)(255.0*((Animation*)(f->data[0]))->p[1]));
+		ofSetColor(0, 128, 198, (int)(255.0*animation->p[1]));
 		ofDrawBitmapString("click", f->pos.left + 21, f->pos.top + 53);
 		ofSetColor(0, 128, 198, 255);
-		move = 15.0*((Animation*)(f->data[0]))->m[2];
+		move = 15.0*animation->m[2];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
@@ -878,11 +901,8 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 2);
+			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
-			//フレームレートの描画
-			ofSetColor(240, 240, 240, 255);
-			ofDrawBitmapString(ofToString((int)ofGetFrameRate()), 4, 25);
 		}
 		//毎フレーム呼び出し関数
 		gui.loop();
@@ -898,13 +918,14 @@ public:
 						  //コンストラクト
 	ShareMem sm; //共有メモリクラス
 	Draw draw; //描画クラス
+	std::string title; //ウィンドウタイトル文字列
 
 			   //関数宣言
 	bool init(LPSTR cmd, WINDOW_INFO win_info2) { //初期化時実行関数
 												  //変数代入
 		win_info = win_info2;
 		//共有メモリ関連
-		if (sm.Open(cmd)) {
+		if (sm.Open((LPCTSTR)cmd)) {
 			return 1;
 		}
 		if (sm.smd->Ready != nullptr) { //多重起動防止
@@ -935,6 +956,12 @@ public:
 		}
 		//GUI描画
 		draw.loop();
+		///debug///
+		title = "";
+		title += "fps:";
+		title += std::to_string(ofGetFrameRate());
+		SetWindowText(win_info.hwnd, (LPCWSTR)title.c_str());
+		///debug///
 		return 0;
 	}
 	//終了時処理
