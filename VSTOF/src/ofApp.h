@@ -747,44 +747,35 @@ public:
 		//アニメーション変数確認
 		bool sw2[3];
 		bool loop;
-		//アニメーションクラスとFBOクラス追加
-		Animation *motion;
-		FBO *pic_buf;
 		if (f->data.size() == 0) {
 			//フレームにクラス追加
 			f->data.push_back(new Animation());
 			f->data.push_back(new FBO());
-			//ポインタ代入
-			motion = (Animation*)f->data[0];
-			pic_buf = (FBO*)f->data[1];
 			//クラス初期化
-			(Animation*)(f->data[0])->add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
-			motion->add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
-			motion->add(0.15, 3, sw); //クリックされたとき
-			motion->add(1.0, 4, &loop);
-			motion->set_fps(fps); //fps指定
-			pic_buf->add(60, 60);
+			((Animation*)(f->data[0]))->add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
+			((Animation*)(f->data[0]))->add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
+			((Animation*)(f->data[0]))->add(0.15, 3, sw); //クリックされたとき
+			((Animation*)(f->data[0]))->add(1.0, 4, &loop);
+			((Animation*)(f->data[0]))->set_fps(fps); //fps指定
+			((FBO*)(f->data[1]))->add(60, 60);
 		}
-		//ポインタ代入
-		motion = (Animation*)f->data[0];
-		pic_buf = (FBO*)f->data[1];
 		//フレームバッファに描画
-		pic_buf->change_c(0);
+		((FBO*)(f->data[1]))->change_c(0);
 		ofSetColor(255, 255, 255, 255);
 		ofRect(0, 0, 60, 60);
-		pic_buf->change_c(-1);
-		pic_buf->change_a(0);
+		((FBO*)(f->data[1]))->change_c(-1);
+		((FBO*)(f->data[1]))->change_a(0);
 		ofClear(0, 0, 0, 255);
 		loop = 1;
 		for (int i = 0; i < 60; i++) {
 			for (int j = 0; j < 60; j++) {
-				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*motion->m[3])) / 20) % 2) * 128);
+				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*((Animation*)(f->data[0]))->m[3])) / 20) % 2) * 128);
 				ofRect(j, i, j + 1, i + 1);
 			}
 		}
 		ofSetColor(0, 0, 0, 0);
 		ofRect(20, 20, 20, 20);
-		pic_buf->change_a(-1);
+		((FBO*)(f->data[1]))->change_a(-1);
 		//スイッチイベント確認
 		//クリックされたとき
 		if (win_event.l_click_in({
@@ -802,14 +793,14 @@ public:
 			f->pos.left + 70,
 			f->pos.top + 80
 		});
-		sw2[1] = (motion->p[0] >= 0.5);
+		sw2[1] = (((Animation*)(f->data[0]))->p[0] >= 0.5);
 		//アニメーション確認
-		motion->loop();
+		((Animation*)(f->data[0]))->loop();
 		//描画
-		pic_buf->draw_c(f->pos.left + 10, f->pos.top + 20, 0);
+		((FBO*)(f->data[1]))->draw_c(f->pos.left + 10, f->pos.top + 20, 0);
 		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 		ofSetColor(0, 128, 198, 255);
-		move = 15.0*motion->m[0];
+		move = 15.0*((Animation*)(f->data[0]))->m[0];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
@@ -817,17 +808,17 @@ public:
 			(int)move * 2
 		);
 		ofSetColor(255, 255, 255, 255);
-		move = 15.0*motion->m[1];
+		move = 15.0*((Animation*)(f->data[0]))->m[1];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
 			(int)move * 2,
 			(int)move * 2
 		);
-		ofSetColor(0, 128, 198, (int)(255.0*motion->p[1]));
+		ofSetColor(0, 128, 198, (int)(255.0*((Animation*)(f->data[0]))->p[1]));
 		ofDrawBitmapString("click", f->pos.left + 21, f->pos.top + 53);
 		ofSetColor(0, 128, 198, 255);
-		move = 15.0*motion->m[2];
+		move = 15.0*((Animation*)(f->data[0]))->m[2];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
@@ -890,6 +881,9 @@ public:
 		{
 			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 2);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
+			//フレームレートの描画
+			ofSetColor(240, 240, 240, 255);
+			ofDrawBitmapString(ofToString((int)ofGetFrameRate()), 4, 25);
 		}
 		//毎フレーム呼び出し関数
 		gui.loop();
