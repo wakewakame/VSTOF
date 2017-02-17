@@ -99,7 +99,7 @@ public:
 				bsw[i] = *swp[i];
 			}
 			//アニメーション処理
-			if (motion[i]) {
+			if ((motion[i]) || (type[i] == 4)) {
 				//経過時間計算
 				if (*swp[i]) {
 					t[i] += (1.0 / fps);
@@ -740,13 +740,13 @@ public:
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
-		
+		rawwave(f, samples, num_sample, mode);
 	}
 	//スイッチUI
 	void sw(frame *f, bool *sw) {
 		//アニメーション変数確認
 		bool sw2[3];
-		bool loop;
+		bool loop = 1;
 		if (f->data.size() == 0) {
 			//フレームにクラス追加
 			f->data.push_back(new Animation());
@@ -766,7 +766,6 @@ public:
 		((FBO*)(f->data[1]))->change_c(-1);
 		((FBO*)(f->data[1]))->change_a(0);
 		ofClear(0, 0, 0, 255);
-		loop = 1;
 		for (int i = 0; i < 60; i++) {
 			for (int j = 0; j < 60; j++) {
 				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*((Animation*)(f->data[0]))->m[3])) / 20) % 2) * 128);
@@ -879,7 +878,7 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			gui.rawwave(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 2);
+			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 2);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 			//フレームレートの描画
 			ofSetColor(240, 240, 240, 255);
