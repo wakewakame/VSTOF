@@ -240,8 +240,11 @@ struct frame {
 	int length; //全フレームが初期値サイズ時の自フレームのサイズ
 	bool lock; //各子フレームの長さ(mode=0なら縦幅,mode=1なら横幅)の固定on/off
 	int lock_length; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
+	std::vector<void*> data; //汎用配列(クラスのポインタなど)
+	/*
 	Animation animation; //アニメーション変数配列
-	FBO fbo;
+	FBO fbo; //バッファフレーム配列
+	*/
 };
 //パラメーター値構造体
 struct VSTParameteresFrames {
@@ -492,6 +495,19 @@ public:
 		}
 		return;
 	}
+	//指定フレーム以下のすべてのフレームでdispose実行
+	void all_dispose(frame *f) {
+		dispose(f);
+		for (int i = 0; i < f->childs.size(); i++) {
+			all_dispose(f->childs[i]);
+		}
+	}
+	//フレーム内でnewしたクラスをすべてdeleteする関数
+	void dispose(frame *f) {
+		for (int i = 0; i < f->data.size(); i++) {
+			delete f->data[i];
+		}
+	}
 };
 
 //パラメーターの値やフレーム変数管理クラス
@@ -505,10 +521,10 @@ public:
 	VSTParameteresFrames p_frame; //パラメーターフレーム変数群
 	VSTParameteresLength p_length; //パラメーター表示範囲変数群
 
-								   //関数宣言
+	//関数宣言
 	Parameteres() { //全パラメーター分のフレーム作成
-					//フレーム生成
-					//frames.add(frame *parent, frame *self, std::string name, int length, bool lock)
+		//フレーム生成
+		//frames.add(frame *parent, frame *self, std::string name, int length, bool lock)
 		frames.add(nullptr, &p_frame.root, "root", 0, 0);
 		frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
 		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
@@ -550,6 +566,10 @@ public:
 		frames.set_parent(&p_frame.fadechange, 1, 2);
 
 		frames.get_length(&p_frame.root); //全フレームのlength等取得
+	}
+	//デストラクタ
+	~Parameteres() {
+		frames.all_dispose(&p_frame.root);
 	}
 };
 
@@ -595,7 +615,7 @@ public:
 	double move; //汎用アニメーション変数
 	double fps; //フレームレート
 
-				//コンストラクト
+	//コンストラクト
 	WIN_EVENT win_event;
 
 	//関数宣言
@@ -718,39 +738,53 @@ public:
 			);
 		}
 	}
+	//拡大縮小可能なグラフ描画関数
+	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
+		
+	}
 	//スイッチUI
 	void sw(frame *f, bool *sw) {
 		//アニメーション変数確認
 		bool sw2[3];
 		bool loop;
-		if (f->animation.get_len() == 0) {
-			f->animation.add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
-			f->animation.add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
-			f->animation.add(0.15, 3, sw); //クリックされたとき
-			f->animation.add(1.0, 4, &loop);
-			f->animation.set_fps(fps); //fps指定
+		//アニメーションクラスとFBOクラス追加
+		Animation *motion;
+		FBO *pic_buf;
+		if (f->data.size() == 0) {
+			//フレームにクラス追加
+			f->data.push_back(new Animation());
+			f->data.push_back(new FBO());
+			//ポインタ代入
+			motion = (Animation*)f->data[0];
+			pic_buf = (FBO*)f->data[1];
+			//クラス初期化
+			(Animation*)(f->data[0])->add(0.15, 3, &sw2[0]); //マウスをかざしたとき1
+			motion->add(0.15, 3, &sw2[1]); //マウスをかざしたとき2
+			motion->add(0.15, 3, sw); //クリックされたとき
+			motion->add(1.0, 4, &loop);
+			motion->set_fps(fps); //fps指定
+			pic_buf->add(60, 60);
 		}
-		//フレームバッファを追加
-		if (f->fbo.num == 0) {
-			f->fbo.add(60, 60);
-		}
+		//ポインタ代入
+		motion = (Animation*)f->data[0];
+		pic_buf = (FBO*)f->data[1];
 		//フレームバッファに描画
-		f->fbo.change_c(0);
+		pic_buf->change_c(0);
 		ofSetColor(255, 255, 255, 255);
 		ofRect(0, 0, 60, 60);
-		f->fbo.change_c(-1);
-		f->fbo.change_a(0);
+		pic_buf->change_c(-1);
+		pic_buf->change_a(0);
 		ofClear(0, 0, 0, 255);
 		loop = 1;
 		for (int i = 0; i < 60; i++) {
 			for (int j = 0; j < 60; j++) {
-				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*f->animation.m[3])) / 20) % 2) * 128);
+				ofSetColor(0, 0, 0, 255 - (((i + j + (int)(40.0*motion->m[3])) / 20) % 2) * 128);
 				ofRect(j, i, j + 1, i + 1);
 			}
 		}
 		ofSetColor(0, 0, 0, 0);
 		ofRect(20, 20, 20, 20);
-		f->fbo.change_a(-1);
+		pic_buf->change_a(-1);
 		//スイッチイベント確認
 		//クリックされたとき
 		if (win_event.l_click_in({
@@ -768,23 +802,14 @@ public:
 			f->pos.left + 70,
 			f->pos.top + 80
 		});
-		sw2[1] = (f->animation.p[0] >= 0.5);
+		sw2[1] = (motion->p[0] >= 0.5);
 		//アニメーション確認
-		f->animation.loop();
+		motion->loop();
 		//描画
-		/*
-		ofSetColor(255, 255, 255, 255);
-		LineBox({
-		f->pos.left + 10,
-		f->pos.top + 20,
-		f->pos.left + 70,
-		f->pos.top + 80
-		},20);
-		*/
-		f->fbo.draw_c(f->pos.left + 10, f->pos.top + 20, 0);
+		pic_buf->draw_c(f->pos.left + 10, f->pos.top + 20, 0);
 		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 		ofSetColor(0, 128, 198, 255);
-		move = 15.0*f->animation.m[0];
+		move = 15.0*motion->m[0];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
@@ -792,17 +817,17 @@ public:
 			(int)move * 2
 		);
 		ofSetColor(255, 255, 255, 255);
-		move = 15.0*f->animation.m[1];
+		move = 15.0*motion->m[1];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
 			(int)move * 2,
 			(int)move * 2
 		);
-		ofSetColor(0, 128, 198, (int)(255.0*f->animation.p[1]));
+		ofSetColor(0, 128, 198, (int)(255.0*motion->p[1]));
 		ofDrawBitmapString("click", f->pos.left + 21, f->pos.top + 53);
 		ofSetColor(0, 128, 198, 255);
-		move = 15.0*f->animation.m[2];
+		move = 15.0*motion->m[2];
 		ofRect(
 			f->pos.left + 40 - (int)move,
 			f->pos.top + 50 - (int)move,
