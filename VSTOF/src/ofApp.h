@@ -53,20 +53,6 @@ struct ShareMemData {
 	HWND Host; //描画先ハンドル
 	VSTParameteres para; //VSTのパラメーター群
 };
-//グラフパラメータ保持
-struct aGraphPara {
-	//コンストラクタ
-	aGraphPara() noexcept {
-
-	}
-	//ムーブコンストラクタ
-	aGraphPara(aGraphPara&& o) noexcept {
-
-	}
-	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
-	std::vector<int> min; //min[次元]
-	std::vector<int> max; //max[次元]
-};
 //アニメーション変数管理クラス
 class Animation {
 private:
@@ -260,6 +246,12 @@ struct frame {
 	Animation animation; //アニメーション変数配列
 	FBO fbo; //バッファフレーム配列
 	*/
+};
+//グラフパラメータ保持
+struct aGraphPara {
+	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
+	std::vector<int> min; //min[次元]
+	std::vector<int> max; //max[次元]
 };
 class GraphPara {
 private:
