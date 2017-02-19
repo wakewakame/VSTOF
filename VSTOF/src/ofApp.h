@@ -53,6 +53,122 @@ struct ShareMemData {
 	HWND Host; //描画先ハンドル
 	VSTParameteres para; //VSTのパラメーター群
 };
+//グラフパラメータ保持
+struct aGraphPara {
+	//コンストラクタ
+	aGraphPara() noexcept {
+
+	}
+	//ムーブコンストラクタ
+	aGraphPara(aGraphPara&& o) noexcept {
+
+	}
+	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
+	std::vector<int> min; //min[次元]
+	std::vector<int> max; //max[次元]
+};
+class GraphPara {
+private:
+	std::vector<aGraphPara> para;
+	std::vector<frame*> f;
+public:
+	//単位変換関数
+	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
+		float b;
+		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
+		return b;
+	}
+	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
+		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
+	}
+	//新規パラメータ空間生成関数
+	void create_space(frame *set_f) {
+		aGraphPara empty; //一時的に空のパラメータ生成
+		para.push_back(empty);
+		f.push_back(set_f);
+	}
+	//新規パラメータ追加関数
+	void create_para(float num, int index, int dim, char mode) {
+		if (para[index].para.size() <= dim) {
+			std::vector<float> empty;
+			para[index].para.push_back(empty);
+			para[index].min.push_back(-1);
+			para[index].max.push_back(-1);
+		}
+		para[index].para[dim].push_back(num);
+		switch (mode) {
+		case 1:
+			para[index].min[dim] = para[index].para[index].size() - 1;
+			break;
+		case 2:
+			para[index].max[dim] = para[index].para[index].size() - 1;
+			break;
+		}
+	}
+	//パラメータ取得関数
+	float get_para(int index, int dim, int dim_index) {
+		return para[index].para[dim][dim_index];
+	}
+	//最小値取得関数
+	float get_min(int index, int dim) {
+		return para[index].min[dim];
+	}
+	//最大値取得関数
+	float get_max(int index, int dim) {
+		return para[index].max[dim];
+	}
+	//フレーム座標変換関数
+	POINT get_pos(int index, int dim) {
+		POINT pos;
+		pos.x = (int)(percent(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+	}
+};
+/*
+struct MM {
+	float min;
+	float max;
+};
+class GraphPara {
+private:
+	std::vector<std::vector<float>> para; //para[パラメータのインデックス][パラメータの次元] = パラメータの値
+	std::vector<std::vector<int>> min; //min[パラメータのインデックス][パラメータの次元] = パラメータの最小値
+	std::vector<std::vector<int>> max; //max[パラメータのインデックス][パラメータの次元] = パラメータの最大値
+	std::vector<frame*> f; //使用するフレームのポインタ
+	//単位変換関数
+	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
+		float b;
+		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
+		return b;
+	}
+	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
+		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
+	}
+public:
+	//新規パラメータ空間追加関数
+	void create_space(frame *set_f) {
+		std::vector<float> empty; //一時的に空の配列を生成
+		para.push_back(empty);
+		f.push_back(set_f);
+	}
+	//新規パラメータ追加関数(追加する値, 追加するパラメータ空間のインデックス,パラメータの役割(0:通常,1:最小値,2:最大値))
+	void create_para(float num, int index, char mode) {
+		para[index].push_back(num);
+		
+	}
+	//パラメータ取得関数
+	std::vector<float> get_para(int index) {
+		return para[index];
+	}
+	//パラメータのフレーム座標取得関数
+	std::vector<int> get_pos(int index) {
+		std::vector<int> res;
+		for (int i = 0; i < para[index].size(); i++) {
+			res.push_back();
+		}
+		return res;
+	}
+};
+*/
 //アニメーション変数管理クラス
 class Animation {
 private:
@@ -208,6 +324,7 @@ public:
 		if (now_index != -1) {
 			alpha[now_index].end();
 			//カラーフレームバッファにマスク適応
+			ofSetColor(255, 255, 255, 255);
 			color[now_index].begin();
 			glBlendFuncSeparate(GL_ZERO, GL_ONE, GL_ONE, GL_ZERO);
 			alpha[now_index].draw(0, 0);
@@ -581,8 +698,8 @@ public:
 	bool l_click; //現在の左クリック情報(押されていたら1)
 	bool b_l_click; //前フレームのl_click変数の内容
 
-					//関数宣言
-					//指定RECT内に存在するかどうか
+	//関数宣言
+	//指定RECT内に存在するかどうか
 	bool in(RECT area) {
 		if (
 			(area.left <= mouse.x) &&
@@ -601,6 +718,10 @@ public:
 	//指定RECT内でマウスがクリックされたかどうか
 	bool l_click_in(RECT area) {
 		return (in(area) && get_l_click());
+	}
+	//指定RECT内でマウスが押されていれば1
+	bool drag_in(RECT area) {
+		return (in(area) && (l_click));
 	}
 	//毎フレーム呼び出し関数
 	void loop() {
@@ -674,7 +795,7 @@ public:
 		}
 	}
 	//グラフ基盤UI(フレーム,波形配列,サンプル数,描画モード)
-	void rawwave(frame *f, float *samples, int num_sample, char mode) {
+	void wave_glaph(frame *f, float *samples, int num_sample, char mode) {
 		//描画効率化のため、ピクセルの数に合わせて描画
 		int index = 0; //配列から値を参照するときのインデックス
 		float percentage = 0.0f;
@@ -745,22 +866,36 @@ public:
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
+		GraphPara *para;
 		if (f->data.size() == 0) {
-			std::shared_ptr<frame> child(new frame);
-			f->data.push_back(&child);
-			frames.add(f, child.get(), "rawwave", 0, 0);
-			f->childs[0]->pos.left = f->pos.left;
-			f->childs[0]->pos.top = f->pos.top;
-			f->childs[0]->pos.right = f->pos.right;
-			f->childs[0]->pos.bottom = f->pos.bottom;
+			//インスタンス化
+			f->data.push_back(new frame);
+			f->data.push_back(new GraphPara);
+			//初期化
+				//フレームクラス
+				frames.add(f, (frame*)(f->data[0]), "wave_glaph", f->mode, 0);
+				frames.set_parent(f, f->mode, 4);
+				f->childs[0]->pos = f->pos;
+				f->childs[0]->size = f->size;
+				f->childs[0]->length = f->length;
+				//グラフパラメータクラス
+				para = (GraphPara*)(f->data[1]);
+				para->create({0.0f,1.0f,0.0f,1.0f});
+		}else{
+			para = (GraphPara*)(f->data[1]);
 		}
-		ofSetColor(255, 255, 255, 255);
-		ofDrawBitmapString(((std::shared_ptr<frame>)(f->childs[0])).use_count(), f->pos.left + 30, f->pos.top + 30);
-		rawwave(f->childs[0], samples, num_sample, mode);
+		wave_glaph(f->childs[0], samples, num_sample, mode);
+		if (win_event.drag_in({ 0,0,100,100 })) {
+			cursor({ win_event.mouse.x, win_event.mouse.y }, 15);
+			//cursor({ f->childs[0]->pos.right,f->childs[0]->pos.top }, 15);
+		}else{
+			cursor({ f->childs[0]->pos.left,f->childs[0]->pos.bottom }, 15);
+			//cursor({ f->childs[0]->pos.right,f->childs[0]->pos.top }, 15);
+		}
 	}
 	//パラメータカーソル描画関数
 	void cursor(POINT pos,int size) {
-		ofSetColor(255, 255, 255, 128);
+		ofSetColor(255, 255, 255, 200);
 		ofRect(pos.x-size/2,pos.y-size/2,size,size);
 	}
 	//スイッチUI
@@ -772,8 +907,8 @@ public:
 		FBO *fbo;
 		if (f->data.size() == 0) {
 			//フレームにクラス追加
-			f->data.push_back(new Animation());
-			f->data.push_back(new FBO());
+			f->data.push_back(new Animation);
+			f->data.push_back(new FBO);
 			//ポインタ代入
 			animation = (Animation*)f->data[0];
 			fbo = (FBO*)f->data[1];
@@ -789,6 +924,7 @@ public:
 			fbo = (FBO*)f->data[1];
 		}
 		//フレームバッファに描画
+		ofSetColor(255, 255, 255, 255);
 		fbo->change_c(0);
 		ofSetColor(255, 255, 255, 255);
 		ofRect(0, 0, 60, 60);

@@ -69,7 +69,8 @@ void ofApp::mouseMoved(int x, int y ){
 
 //--------------------------------------------------------------
 void ofApp::mouseDragged(int x, int y, int button){
-
+	app.draw.gui.win_event.mouse.x = x;
+	app.draw.gui.win_event.mouse.y = y;
 }
 
 //--------------------------------------------------------------
