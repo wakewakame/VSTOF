@@ -253,7 +253,7 @@ private:
 	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
 	std::vector<int> min; //min[次元]
 	std::vector<int> max; //max[次元]
-	std::vector<frame*> f;
+	frame *f;
 public:
 	//単位変換関数
 	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
@@ -263,6 +263,10 @@ public:
 	}
 	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
 		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
+	}
+	//フレーム設定
+	void set_frame(frame *set_f) {
+		f = set_f;
 	}
 	//新規パラメータ追加関数
 	void create(float num, int dim, char mode) {
@@ -295,10 +299,23 @@ public:
 	float get_max(int dim) {
 		return max[dim];
 	}
-	//フレーム座標変換関数
-	POINT get_pos(int dim) {
+	//フレーム座標変換関数(x座標:dim1,y座標:dim2)
+	std::vector<float> get_pos(int dim1, int dim2, int index) {
 		POINT pos;
-		pos.x = (int)(percent(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+		pos.x = (int)(percent(
+			para[dim1][index],
+			para[dim1][min[dim1]],
+			para[dim1][max[dim1]],
+			(float)f->pos.left,
+			(float)f->pos.right
+		));
+		pos.y = (int)(percent(
+			para[dim2][index],
+			para[dim2][min[dim2]],
+			para[dim2][max[dim2]],
+			(float)f->pos.top,
+			(float)f->pos.bottom
+		));
 	}
 };
 //パラメーター値構造体
