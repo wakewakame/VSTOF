@@ -248,14 +248,11 @@ struct frame {
 	*/
 };
 //グラフパラメータ保持
-struct aGraphPara {
+class GraphPara {
+private:
 	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
 	std::vector<int> min; //min[次元]
 	std::vector<int> max; //max[次元]
-};
-class GraphPara {
-private:
-	std::vector<aGraphPara> para;
 	std::vector<frame*> f;
 public:
 	//単位変換関数
@@ -267,45 +264,39 @@ public:
 	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
 		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
 	}
-	//新規パラメータ空間生成関数
-	void create_space(frame *set_f) {
-	aGraphPara empty; //一時的に空のパラメータ生成
-	para.push_back(empty);
-	f.push_back(set_f);
-	}
 	//新規パラメータ追加関数
-	void create_para(float num, int index, int dim, char mode) {
+	void create(float num, int dim, char mode) {
 		//次元数が足りなければ追加
-		if (para[index].para.size() <= dim) {
+		while (para.size() < dim + 1) {
 			std::vector<float> empty;
-			para[index].para.push_back(empty);
-			para[index].min.push_back(-1);
-			para[index].max.push_back(-1);
+			para.push_back(empty);
+			min.push_back(-1);
+			max.push_back(-1);
 		}
-		para[index].para[dim].push_back(num);
+		para[dim].push_back(num);
 		switch (mode) {
 		case 1:
-			para[index].min[dim] = para[index].para[index].size() - 1;
+			min[dim] = para[dim].size() - 1;
 			break;
 		case 2:
-			para[index].max[dim] = para[index].para[index].size() - 1;
+			max[dim] = para[dim].size() - 1;
 			break;
 		}
 	}
 	//パラメータ取得関数
-	float get_para(int index, int dim, int dim_index) {
-		return para[index].para[dim][dim_index];
+	float get_para(int dim, int index) {
+		return para[dim][index];
 	}
 	//最小値取得関数
-	float get_min(int index, int dim) {
-		return para[index].min[dim];
+	float get_min(int dim) {
+		return min[dim];
 	}
 	//最大値取得関数
-	float get_max(int index, int dim) {
-		return para[index].max[dim];
+	float get_max(int dim) {
+		return max[dim];
 	}
 	//フレーム座標変換関数
-	POINT get_pos(int index, int dim) {
+	POINT get_pos(int dim) {
 		POINT pos;
 		pos.x = (int)(percent(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
 	}
