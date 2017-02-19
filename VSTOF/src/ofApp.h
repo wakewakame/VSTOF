@@ -276,13 +276,11 @@ public:
 		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
 	}
 	//新規パラメータ空間生成関数
-	/*
 	void create_space(frame *set_f) {
 	aGraphPara empty; //一時的に空のパラメータ生成
 	para.push_back(empty);
 	f.push_back(set_f);
 	}
-	*/
 	//新規パラメータ追加関数
 	void create_para(float num, int index, int dim, char mode) {
 		//次元数が足りなければ追加
