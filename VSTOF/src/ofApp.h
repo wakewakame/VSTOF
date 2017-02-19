@@ -1,201 +1,99 @@
-#pragma once
+ï»¿#pragma once
 
 #include "ofMain.h"
 #include "windows.h"
 #include <vector>
 #include <string>
 
-//ƒEƒBƒ“ƒhƒEî•ñ•Û•Ï”
+//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æƒ…å ±ä¿æŒå¤‰æ•°
 struct WINDOW_INFO {
-	POINT size; //ƒEƒBƒ“ƒhƒEƒTƒCƒY
-	POINT b_size; //‘OƒtƒŒ[ƒ€‚ÌƒEƒBƒ“ƒhƒEƒTƒCƒY
-	RECT window; //ƒEƒBƒ“ƒhƒE¶ã‰E‰ºÀ•W(ƒfƒXƒNƒgƒbƒvŠî€)
-	HDC glDc; //OpenFrameworks‚ÌOpenGL‚ÌƒfƒoƒCƒXƒRƒ“ƒeƒLƒXƒg
-	HWND hwnd; //OpenFrameworks‚Ì¶¬ƒEƒBƒ“ƒhƒE‚Ìƒnƒ“ƒhƒ‹
-	int fps; //ƒEƒBƒ“ƒhƒE‚Ì•`‰æƒtƒŒ[ƒ€ƒŒ[ƒg
-	double speed; //60fps‚ğŠî€‚Æ‚µ‚½ƒtƒŒ[ƒ€’PˆÊ‚ÌƒAƒjƒ[ƒVƒ‡ƒ“‘¬“x
+	POINT size; //ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚º
+	POINT b_size; //å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚º
+	RECT window; //ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦å·¦ä¸Šå³ä¸‹åº§æ¨™(ãƒ‡ã‚¹ã‚¯ãƒˆãƒƒãƒ—åŸºæº–)
+	HDC glDc; //OpenFrameworksã®OpenGLã®ãƒ‡ãƒã‚¤ã‚¹ã‚³ãƒ³ãƒ†ã‚­ã‚¹ãƒˆ
+	HWND hwnd; //OpenFrameworksã®ç”Ÿæˆã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®ãƒãƒ³ãƒ‰ãƒ«
+	int fps; //ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã®æç”»ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆ
+	double speed; //60fpsã‚’åŸºæº–ã¨ã—ãŸãƒ•ãƒ¬ãƒ¼ãƒ å˜ä½ã®ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é€Ÿåº¦
 };
-//\‘¢‘ÌéŒ¾
-struct VSTParameteres { //ƒpƒ‰ƒ[ƒ^[’l\‘¢‘Ì
-						//‰¹FŒn
-	bool make_auto; //©“®‚Å‰¹F‚ğ¶¬‚·‚é‚©
-	bool use_rawwave; //¶”gŒ`ƒf[ƒ^‚Ìg—p‚ğ‚·‚é‚©‚Ç‚¤‚©
-	bool change_natural; //‰¹’ö•Ï‰»‚ğ©‘R‚É‚·‚é‚©
-	float overtones[512]; //”{‰¹ƒOƒ‰ƒtor‹¤–ÂƒXƒyƒNƒgƒ‹ƒOƒ‰ƒt
-	int iovertones; //”{‰¹‚Ì”
-					//¶”gŒ`ƒf[ƒ^”h¶
-	float rawwave[4096]; //¶”gŒ`‚Ìg—p•”•ª”gŒ`(ƒtƒ@ƒCƒ‹ƒ}ƒbƒsƒ“ƒO‚É‚·‚é‚©‚à(LEƒÖEM))
-	int nrawwave; //¶”gŒ`‚ÌƒTƒ“ƒvƒ‹”
-	float base_pitch; //Šî‰¹ˆÊ’u(è“®•ÏX‰Â)
-					  //¶¬”gŒ`
-	float outwave[4096]; //o—Í‚³‚ê‚é”gŒ`
-	int noutwave; //o—Í”gŒ`‚ÌƒTƒ“ƒvƒ‹”
-				  //ƒtƒF[ƒhŒn
-	bool use_string_mode; //Œ·ƒ‚[ƒh‚Ìg—p‚ğ‚·‚é‚©‚Ç‚¤‚©
-	bool use_fade_change; //‚È‚ß‚ç‚©‚È‰¹’ö,‰¹—Ê‚Ì•Ï‰»‚ğg—p‚·‚é‚©‚Ç‚¤‚©(2‚Â“¯‚É‰¹‚ğo‚¹‚È‚¢)
+//æ§‹é€ ä½“å®£è¨€
+struct VSTParameteres { //ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼å€¤æ§‹é€ ä½“
+						//éŸ³è‰²ç³»
+	bool make_auto; //è‡ªå‹•ã§éŸ³è‰²ã‚’ç”Ÿæˆã™ã‚‹ã‹
+	bool use_rawwave; //ç”Ÿæ³¢å½¢ãƒ‡ãƒ¼ã‚¿ã®ä½¿ç”¨ã‚’ã™ã‚‹ã‹ã©ã†ã‹
+	bool change_natural; //éŸ³ç¨‹å¤‰åŒ–ã‚’è‡ªç„¶ã«ã™ã‚‹ã‹
+	float overtones[512]; //å€éŸ³ã‚°ãƒ©ãƒ•orå…±é³´ã‚¹ãƒšã‚¯ãƒˆãƒ«ã‚°ãƒ©ãƒ•
+	int iovertones; //å€éŸ³ã®æ•°
+					//ç”Ÿæ³¢å½¢ãƒ‡ãƒ¼ã‚¿æ´¾ç”Ÿ
+	float rawwave[4096]; //ç”Ÿæ³¢å½¢ã®ä½¿ç”¨éƒ¨åˆ†æ³¢å½¢(ãƒ•ã‚¡ã‚¤ãƒ«ãƒãƒƒãƒ”ãƒ³ã‚°ã«ã™ã‚‹ã‹ã‚‚(Â´ãƒ»Ï‰ãƒ»ï½€))
+	int nrawwave; //ç”Ÿæ³¢å½¢ã®ã‚µãƒ³ãƒ—ãƒ«æ•°
+	float base_pitch; //åŸºéŸ³ä½ç½®(æ‰‹å‹•å¤‰æ›´å¯)
+					  //ç”Ÿæˆæ³¢å½¢
+	float outwave[4096]; //å‡ºåŠ›ã•ã‚Œã‚‹æ³¢å½¢
+	int noutwave; //å‡ºåŠ›æ³¢å½¢ã®ã‚µãƒ³ãƒ—ãƒ«æ•°
+				  //ãƒ•ã‚§ãƒ¼ãƒ‰ç³»
+	bool use_string_mode; //å¼¦ãƒ¢ãƒ¼ãƒ‰ã®ä½¿ç”¨ã‚’ã™ã‚‹ã‹ã©ã†ã‹
+	bool use_fade_change; //ãªã‚ã‚‰ã‹ãªéŸ³ç¨‹,éŸ³é‡ã®å¤‰åŒ–ã‚’ä½¿ç”¨ã™ã‚‹ã‹ã©ã†ã‹(2ã¤åŒæ™‚ã«éŸ³ã‚’å‡ºã›ãªã„)
 	float fadein_vol[6];
 	float fadein_pitch[6];
 	float fadeout_vol[6];
 	float fadeout_pitch[6];
 	float fadechange_vol[6];
 	float fadechange_pitch[6];
-	//”gŒ`‚Ìâ‘Î’l‚ÌãŒÀ
+	//æ³¢å½¢ã®çµ¶å¯¾å€¤ã®ä¸Šé™
 	float wave_limit;
-	//Šî–{”gŒ`‚ÌŒ`
+	//åŸºæœ¬æ³¢å½¢ã®å½¢
 	char wave_type;
-	//Ä¶’†•ÏX‚Å‚«‚é‚Æ•Ö—˜‚Èƒpƒ‰ƒ[ƒ^[
+	//å†ç”Ÿä¸­å¤‰æ›´ã§ãã‚‹ã¨ä¾¿åˆ©ãªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
 	float vol;
-	float pitch; //MIDI’l‚É‰ÁZ
+	float pitch; //MIDIå€¤ã«åŠ ç®—
 };
-//‹¤—Lƒƒ‚ƒŠ\‘¢‘Ì
+//å…±æœ‰ãƒ¡ãƒ¢ãƒªæ§‹é€ ä½“
 struct ShareMemData {
-	HWND Ready; //GUIƒNƒ‰ƒCƒAƒ“ƒg‚ª‹N“®’¼Œã‚ÉTRUE‚É‚·‚é(‘½d‹N“®‰ñ”ğ‚Ì‚½‚ß)
-	HWND Host; //•`‰ææƒnƒ“ƒhƒ‹
-	VSTParameteres para; //VST‚Ìƒpƒ‰ƒ[ƒ^[ŒQ
+	HWND Ready; //GUIã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆãŒèµ·å‹•ç›´å¾Œã«TRUEã«ã™ã‚‹(å¤šé‡èµ·å‹•å›é¿ã®ãŸã‚)
+	HWND Host; //æç”»å…ˆãƒãƒ³ãƒ‰ãƒ«
+	VSTParameteres para; //VSTã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ç¾¤
 };
-//ƒOƒ‰ƒtƒpƒ‰ƒ[ƒ^•Û
+//ã‚°ãƒ©ãƒ•ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ä¿æŒ
 struct aGraphPara {
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	aGraphPara() noexcept {
 
 	}
-	//ƒ€[ƒuƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ãƒ ãƒ¼ãƒ–ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	aGraphPara(aGraphPara&& o) noexcept {
 
 	}
-	std::vector<std::vector<float>> para; //para[ŸŒ³][ƒCƒ“ƒfƒbƒNƒX] (1ŸŒ³‚È‚çdim=0)
-	std::vector<int> min; //min[ŸŒ³]
-	std::vector<int> max; //max[ŸŒ³]
+	std::vector<std::vector<float>> para; //para[æ¬¡å…ƒ][ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹] (1æ¬¡å…ƒãªã‚‰dim=0)
+	std::vector<int> min; //min[æ¬¡å…ƒ]
+	std::vector<int> max; //max[æ¬¡å…ƒ]
 };
-class GraphPara {
-private:
-	std::vector<aGraphPara> para;
-	std::vector<frame*> f;
-public:
-	//’PˆÊ•ÏŠ·ŠÖ”
-	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
-		float b;
-		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
-		return b;
-	}
-	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
-		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
-	}
-	//V‹Kƒpƒ‰ƒ[ƒ^‹óŠÔ¶¬ŠÖ”
-	void create_space(frame *set_f) {
-		aGraphPara empty; //ˆê“I‚É‹ó‚Ìƒpƒ‰ƒ[ƒ^¶¬
-		para.push_back(empty);
-		f.push_back(set_f);
-	}
-	//V‹Kƒpƒ‰ƒ[ƒ^’Ç‰ÁŠÖ”
-	void create_para(float num, int index, int dim, char mode) {
-		if (para[index].para.size() <= dim) {
-			std::vector<float> empty;
-			para[index].para.push_back(empty);
-			para[index].min.push_back(-1);
-			para[index].max.push_back(-1);
-		}
-		para[index].para[dim].push_back(num);
-		switch (mode) {
-		case 1:
-			para[index].min[dim] = para[index].para[index].size() - 1;
-			break;
-		case 2:
-			para[index].max[dim] = para[index].para[index].size() - 1;
-			break;
-		}
-	}
-	//ƒpƒ‰ƒ[ƒ^æ“¾ŠÖ”
-	float get_para(int index, int dim, int dim_index) {
-		return para[index].para[dim][dim_index];
-	}
-	//Å¬’læ“¾ŠÖ”
-	float get_min(int index, int dim) {
-		return para[index].min[dim];
-	}
-	//Å‘å’læ“¾ŠÖ”
-	float get_max(int index, int dim) {
-		return para[index].max[dim];
-	}
-	//ƒtƒŒ[ƒ€À•W•ÏŠ·ŠÖ”
-	POINT get_pos(int index, int dim) {
-		POINT pos;
-		pos.x = (int)(percent(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
-	}
-};
-/*
-struct MM {
-	float min;
-	float max;
-};
-class GraphPara {
-private:
-	std::vector<std::vector<float>> para; //para[ƒpƒ‰ƒ[ƒ^‚ÌƒCƒ“ƒfƒbƒNƒX][ƒpƒ‰ƒ[ƒ^‚ÌŸŒ³] = ƒpƒ‰ƒ[ƒ^‚Ì’l
-	std::vector<std::vector<int>> min; //min[ƒpƒ‰ƒ[ƒ^‚ÌƒCƒ“ƒfƒbƒNƒX][ƒpƒ‰ƒ[ƒ^‚ÌŸŒ³] = ƒpƒ‰ƒ[ƒ^‚ÌÅ¬’l
-	std::vector<std::vector<int>> max; //max[ƒpƒ‰ƒ[ƒ^‚ÌƒCƒ“ƒfƒbƒNƒX][ƒpƒ‰ƒ[ƒ^‚ÌŸŒ³] = ƒpƒ‰ƒ[ƒ^‚ÌÅ‘å’l
-	std::vector<frame*> f; //g—p‚·‚éƒtƒŒ[ƒ€‚Ìƒ|ƒCƒ“ƒ^
-	//’PˆÊ•ÏŠ·ŠÖ”
-	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
-		float b;
-		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
-		return b;
-	}
-	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
-		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
-	}
-public:
-	//V‹Kƒpƒ‰ƒ[ƒ^‹óŠÔ’Ç‰ÁŠÖ”
-	void create_space(frame *set_f) {
-		std::vector<float> empty; //ˆê“I‚É‹ó‚Ì”z—ñ‚ğ¶¬
-		para.push_back(empty);
-		f.push_back(set_f);
-	}
-	//V‹Kƒpƒ‰ƒ[ƒ^’Ç‰ÁŠÖ”(’Ç‰Á‚·‚é’l, ’Ç‰Á‚·‚éƒpƒ‰ƒ[ƒ^‹óŠÔ‚ÌƒCƒ“ƒfƒbƒNƒX,ƒpƒ‰ƒ[ƒ^‚Ì–ğŠ„(0:’Êí,1:Å¬’l,2:Å‘å’l))
-	void create_para(float num, int index, char mode) {
-		para[index].push_back(num);
-		
-	}
-	//ƒpƒ‰ƒ[ƒ^æ“¾ŠÖ”
-	std::vector<float> get_para(int index) {
-		return para[index];
-	}
-	//ƒpƒ‰ƒ[ƒ^‚ÌƒtƒŒ[ƒ€À•Wæ“¾ŠÖ”
-	std::vector<int> get_pos(int index) {
-		std::vector<int> res;
-		for (int i = 0; i < para[index].size(); i++) {
-			res.push_back();
-		}
-		return res;
-	}
-};
-*/
-//ƒAƒjƒ[ƒVƒ‡ƒ“•Ï”ŠÇ—ƒNƒ‰ƒX
+//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¤‰æ•°ç®¡ç†ã‚¯ãƒ©ã‚¹
 class Animation {
 private:
-	//•Ï”éŒ¾
-	double fps; //ƒtƒŒ[ƒ€ƒŒ[ƒg
-	std::vector<bool> motion; //ƒAƒjƒ[ƒVƒ‡ƒ“‚ªŠJn‚³‚ê‚Ä‚¢‚ê‚Î1,‚»‚êˆÓŠO‚Í0
-	std::vector<double> len; //ƒAƒjƒ[ƒVƒ‡ƒ“‚·‚éŠÔ(’PˆÊ‚Ísec)
-	std::vector<double> t; //fps‚ÉˆË‘¶‚µ‚È‚¢Œo‰ßŠÔ(0.0<=t<=len)
-	std::vector<char> type; //ƒAƒjƒ[ƒVƒ‡ƒ“‚Ì•Ï‰»‚Ìí—Ş(0<=val)
-	std::vector<bool*> swp; //sw=0‚È‚çt‚ğ0‚É‹ß‚Ã‚¯A‹t‚È‚ç‹t
-	std::vector<bool> bsw; //‘OƒtƒŒ[ƒ€‚Ì‚Æ‚«‚Ìsw1
+	//å¤‰æ•°å®£è¨€
+	double fps; //ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆ
+	std::vector<bool> motion; //ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ãŒé–‹å§‹ã•ã‚Œã¦ã„ã‚Œã°1,ãã‚Œæ„å¤–ã¯0
+	std::vector<double> len; //ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã™ã‚‹æ™‚é–“(å˜ä½ã¯sec)
+	std::vector<double> t; //fpsã«ä¾å­˜ã—ãªã„çµŒéæ™‚é–“(0.0<=t<=len)
+	std::vector<char> type; //ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ã®å¤‰åŒ–ã®ç¨®é¡(0<=val)
+	std::vector<bool*> swp; //sw=0ãªã‚‰tã‚’0ã«è¿‘ã¥ã‘ã€é€†ãªã‚‰é€†
+	std::vector<bool> bsw; //å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã¨ãã®sw1
 
 public:
-	//•Ï”éŒ¾
-	std::vector<double> m; //ƒ‚[ƒVƒ‡ƒ“À•W(Šî–{“I‚É 0.0<=m<=1.0)
+	//å¤‰æ•°å®£è¨€
+	std::vector<double> m; //ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³åº§æ¨™(åŸºæœ¬çš„ã« 0.0<=m<=1.0)
 	std::vector<double> p; //(p/1.0)=(t/len)
 
-						   //ŠÖ”éŒ¾
-						   //fpsw’è
+						   //é–¢æ•°å®£è¨€
+						   //fpsæŒ‡å®š
 	void set_fps(double frame_rate) {
 		fps = frame_rate;
 	}
-	//ƒAƒjƒ[ƒVƒ‡ƒ“”z—ñ‚Ì’·‚³
+	//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é…åˆ—ã®é•·ã•
 	int get_len() {
 		return t.size();
 	}
-	//ƒAƒjƒ[ƒVƒ‡ƒ“•Ï”‚Ì’Ç‰Á
+	//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¤‰æ•°ã®è¿½åŠ 
 	void add(double length, char effect_type, bool *sw) {
 		motion.push_back(0);
 		len.push_back(length);
@@ -206,17 +104,17 @@ public:
 		swp.push_back(sw);
 		bsw.push_back(*sw);
 	}
-	//–ˆƒtƒŒ[ƒ€ŒÄ‚Ño‚µŠÖ”
+	//æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã³å‡ºã—é–¢æ•°
 	void loop() {
 		for (int i = 0; i < t.size(); i++) {
-			//‘OƒtƒŒ[ƒ€‚Æ‚Ì’l‚ªˆá‚¤ê‡AƒAƒjƒ[ƒVƒ‡ƒ“ŠJn
+			//å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã¨ã®å€¤ãŒé•ã†å ´åˆã€ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³é–‹å§‹
 			if (*swp[i] != bsw[i]) {
 				motion[i] = 1;
 				bsw[i] = *swp[i];
 			}
-			//ƒAƒjƒ[ƒVƒ‡ƒ“ˆ—
+			//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å‡¦ç†
 			if ((motion[i]) || (type[i] == 4)) {
-				//Œo‰ßŠÔŒvZ
+				//çµŒéæ™‚é–“è¨ˆç®—
 				if (*swp[i]) {
 					t[i] += (1.0 / fps);
 					if (t[i] >= len[i]) {
@@ -231,7 +129,7 @@ public:
 						motion[i] = 0;
 					}
 				}
-				//ƒ‚[ƒVƒ‡ƒ“ŒvZ
+				//ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³è¨ˆç®—
 				p[i] = t[i] / len[i];
 				switch (type[i]) {
 				case 0:
@@ -248,11 +146,11 @@ public:
 					break;
 				case 3:
 					//y=3*(x^2)-2*(x^3)
-					//x=0‚Åy‚ª‹É¬’l0‚Æ‚È‚èAx=1‚Åy‚ª‹É‘å’l1‚Æ‚È‚éOŸŠÖ”
+					//x=0ã§yãŒæ¥µå°å€¤0ã¨ãªã‚Šã€x=1ã§yãŒæ¥µå¤§å€¤1ã¨ãªã‚‹ä¸‰æ¬¡é–¢æ•°
 					m[i] = 3 * pow(p[i], 2) - 2 * pow(p[i], 3);
 					break;
 				case 4:
-					//w’èŠÔ‚ğ0.0-1.0‹æŠÔƒ‹[ƒv
+					//æŒ‡å®šæ™‚é–“ã‚’0.0-1.0åŒºé–“ãƒ«ãƒ¼ãƒ—
 					if (motion[i] == 0) {
 						motion[i] = 1;
 						t[i] = 0.0;
@@ -264,52 +162,52 @@ public:
 		}
 	}
 };
-//ƒtƒŒ[ƒ€ƒoƒbƒtƒ@ƒNƒ‰ƒX
+//ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒ©ã‚¹
 class FBO {
 public:
 	/*
-	///ƒƒ‚///
-	ƒAƒ‹ƒtƒ@ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚Í•K—v‚È‚Æ‚«‚¾‚¯¶¬‚·‚é
+	///ãƒ¡ãƒ¢///
+	ã‚¢ãƒ«ãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã¯å¿…è¦ãªã¨ãã ã‘ç”Ÿæˆã™ã‚‹
 	*/
-	//ƒtƒŒ[ƒ€ƒoƒbƒtƒ@ƒNƒ‰ƒX‚Ì”z—ñ
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒ©ã‚¹ã®é…åˆ—
 	std::vector<ofFbo> color;
 	std::vector<ofFbo> alpha;
-	//Œ»İ‚ÌƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚ÌŒÂ”
+	//ç¾åœ¨ã®ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã®å€‹æ•°
 	int num;
-	//Œ»İg—p‚µ‚Ä‚¢‚éƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚ÌƒCƒ“ƒfƒbƒNƒX(-1‚È‚çƒŒƒ“ƒ_[ƒoƒbƒtƒ@)
+	//ç¾åœ¨ä½¿ç”¨ã—ã¦ã„ã‚‹ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹(-1ãªã‚‰ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒãƒƒãƒ•ã‚¡)
 	int now_index;
-	//‰¼ƒtƒŒ[ƒ€ƒoƒbƒtƒ@ƒNƒ‰ƒX‚ÌƒRƒ“ƒXƒgƒ‰ƒNƒg
+	//ä»®ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒ©ã‚¹ã®ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
 	ofFbo fbo_;
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	FBO() {
 		now_index = -1;
 		num = 0;
 	}
-	//ƒfƒXƒgƒ‰ƒNƒ^
+	//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~FBO() {
 		if (now_index != -1) {
 			color[now_index].end();
 			alpha[now_index].end();
 		}
 	}
-	//ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚Ì’Ç‰Á
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã®è¿½åŠ 
 	int add(int x, int y) {
-		//ƒJƒ‰[ƒtƒŒ[ƒ€ƒoƒbƒtƒ@
-		color.push_back(fbo_); //”z—ñ‚ÉƒJƒ‰[ƒtƒŒ[ƒ€ƒoƒbƒtƒ@ƒNƒ‰ƒX’Ç‰Á
-		color[num].allocate(x, y, GL_RGBA); //ƒJƒ‰[ƒtƒŒ[ƒ€ƒoƒbƒtƒ@¶¬
+		//ã‚«ãƒ©ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡
+		color.push_back(fbo_); //é…åˆ—ã«ã‚«ãƒ©ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒ©ã‚¹è¿½åŠ 
+		color[num].allocate(x, y, GL_RGBA); //ã‚«ãƒ©ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ç”Ÿæˆ
 		color[num].begin();
-		ofClear(255, 255, 255, 0); //ƒJƒ‰[ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‰Šú‰»
+		ofClear(255, 255, 255, 0); //ã‚«ãƒ©ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡åˆæœŸåŒ–
 		color[num].end();
-		//ƒAƒ‹ƒtƒ@ƒtƒŒ[ƒ€ƒoƒbƒtƒ@
-		alpha.push_back(fbo_); //”z—ñ‚ÉƒAƒ‹ƒtƒ@ƒtƒŒ[ƒ€ƒoƒbƒtƒ@ƒNƒ‰ƒX’Ç‰Á
-		alpha[num].allocate(x, y, GL_ALPHA); //ƒAƒ‹ƒtƒ@ƒtƒŒ[ƒ€ƒoƒbƒtƒ@¶¬
+		//ã‚¢ãƒ«ãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡
+		alpha.push_back(fbo_); //é…åˆ—ã«ã‚¢ãƒ«ãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã‚¯ãƒ©ã‚¹è¿½åŠ 
+		alpha[num].allocate(x, y, GL_ALPHA); //ã‚¢ãƒ«ãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ç”Ÿæˆ
 		alpha[num].begin();
-		ofClear(0, 0, 0, 255); //ƒAƒ‹ƒtƒ@ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‰Šú‰»
+		ofClear(0, 0, 0, 255); //ã‚¢ãƒ«ãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡åˆæœŸåŒ–
 		alpha[num].end();
 		num += 1;
 		return num - 1;
 	}
-	//ƒJƒ‰[ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚ÌØ‚è‘Ö‚¦(index=-1‚È‚çƒŒƒ“ƒ_[ƒoƒbƒtƒ@)
+	//ã‚«ãƒ©ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã®åˆ‡ã‚Šæ›¿ãˆ(index=-1ãªã‚‰ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒãƒƒãƒ•ã‚¡)
 	void change_c(int index) {
 		if (now_index != -1) {
 			color[now_index].end();
@@ -319,11 +217,11 @@ public:
 		}
 		now_index = index;
 	}
-	//ƒAƒ‹ƒtƒ@ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚ÌØ‚è‘Ö‚¦(index=-1‚È‚çƒŒƒ“ƒ_[ƒoƒbƒtƒ@)
+	//ã‚¢ãƒ«ãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã®åˆ‡ã‚Šæ›¿ãˆ(index=-1ãªã‚‰ãƒ¬ãƒ³ãƒ€ãƒ¼ãƒãƒƒãƒ•ã‚¡)
 	void change_a(int index) {
 		if (now_index != -1) {
 			alpha[now_index].end();
-			//ƒJƒ‰[ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚Éƒ}ƒXƒN“K‰
+			//ã‚«ãƒ©ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã«ãƒã‚¹ã‚¯é©å¿œ
 			ofSetColor(255, 255, 255, 255);
 			color[now_index].begin();
 			glBlendFuncSeparate(GL_ZERO, GL_ONE, GL_ONE, GL_ZERO);
@@ -337,61 +235,120 @@ public:
 		}
 		now_index = index;
 	}
-	//w’èƒJƒ‰[ƒoƒbƒtƒ@•`‰æ
+	//æŒ‡å®šã‚«ãƒ©ãƒ¼ãƒãƒƒãƒ•ã‚¡æç”»
 	void draw_c(int x, int y, int index) {
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE);
 		color[index].draw(x, y);
 	}
 };
-//ƒtƒŒ[ƒ€\‘¢‘Ì
+//ãƒ•ãƒ¬ãƒ¼ãƒ æ§‹é€ ä½“
 struct frame {
-	frame *parent; //eƒtƒŒ[ƒ€‚Ìƒ|ƒCƒ“ƒ^
-	int num_child; //qƒtƒŒ[ƒ€‚Ì”
-	std::vector<frame*> childs; //‘SqƒtƒŒ[ƒ€‚Ìƒ|ƒCƒ“ƒ^”z—ñ
-	int index;//“¯ƒtƒŒ[ƒ€“à‚Ì©ƒtƒŒ[ƒ€‚ÌŠ„“–”Ô†(=0,1,2,3,...)
-	RECT pos; //ƒtƒŒ[ƒ€À•W
-	POINT size; //ƒtƒŒ[ƒ€ƒTƒCƒY(––’[ƒtƒŒ[ƒ€‚Ì‚İ‘ã“ü)
-	std::string name; //ƒtƒŒ[ƒ€‚Ì–¼Ì
-	bool mode; //qƒtƒŒ[ƒ€‚ªc•À‚Ñ=0,‰¡•À‚Ñ=1
-	int gap; //qƒtƒŒ[ƒ€ŠÔ“¯m‚ÌŒ„ŠÔ(px’PˆÊ)
-	int length; //‘SƒtƒŒ[ƒ€‚ª‰Šú’lƒTƒCƒY‚Ì©ƒtƒŒ[ƒ€‚ÌƒTƒCƒY
-	bool lock; //ŠeqƒtƒŒ[ƒ€‚Ì’·‚³(mode=0‚È‚çc•,mode=1‚È‚ç‰¡•)‚ÌŒÅ’èon/off
-	int lock_length; //ŒÅ’èƒTƒCƒY‚Ì‘SqƒtƒŒ[ƒ€‚Æ‘Sgap‚Ì˜a(––’[ƒtƒŒ[ƒ€‚Í0‚ğ‘ã“ü)
-	std::vector<void*> data; //”Ä—p”z—ñ(ƒNƒ‰ƒX‚Ìƒ|ƒCƒ“ƒ^‚È‚Ç)
+	frame *parent; //è¦ªãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒã‚¤ãƒ³ã‚¿
+	int num_child; //å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ•°
+	std::vector<frame*> childs; //å…¨å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒã‚¤ãƒ³ã‚¿é…åˆ—
+	int index;//åŒãƒ•ãƒ¬ãƒ¼ãƒ å†…ã®è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®å‰²å½“ç•ªå·(=0,1,2,3,...)
+	RECT pos; //ãƒ•ãƒ¬ãƒ¼ãƒ åº§æ¨™
+	POINT size; //ãƒ•ãƒ¬ãƒ¼ãƒ ã‚µã‚¤ã‚º(æœ«ç«¯ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã¿ä»£å…¥)
+	std::string name; //ãƒ•ãƒ¬ãƒ¼ãƒ ã®åç§°
+	bool mode; //å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒç¸¦ä¸¦ã³=0,æ¨ªä¸¦ã³=1
+	int gap; //å­ãƒ•ãƒ¬ãƒ¼ãƒ é–“åŒå£«ã®éš™é–“(pxå˜ä½)
+	int length; //å…¨ãƒ•ãƒ¬ãƒ¼ãƒ ãŒåˆæœŸå€¤ã‚µã‚¤ã‚ºæ™‚ã®è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚µã‚¤ã‚º
+	bool lock; //å„å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®é•·ã•(mode=0ãªã‚‰ç¸¦å¹…,mode=1ãªã‚‰æ¨ªå¹…)ã®å›ºå®šon/off
+	int lock_length; //å›ºå®šã‚µã‚¤ã‚ºã®å…¨å­ãƒ•ãƒ¬ãƒ¼ãƒ ã¨å…¨gapã®å’Œ(æœ«ç«¯ãƒ•ãƒ¬ãƒ¼ãƒ ã¯0ã‚’ä»£å…¥)
+	std::vector<void*> data; //æ±ç”¨é…åˆ—(ã‚¯ãƒ©ã‚¹ã®ãƒã‚¤ãƒ³ã‚¿ãªã©)
 	/*
-	Animation animation; //ƒAƒjƒ[ƒVƒ‡ƒ“•Ï””z—ñ
-	FBO fbo; //ƒoƒbƒtƒ@ƒtƒŒ[ƒ€”z—ñ
+	Animation animation; //ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¤‰æ•°é…åˆ—
+	FBO fbo; //ãƒãƒƒãƒ•ã‚¡ãƒ•ãƒ¬ãƒ¼ãƒ é…åˆ—
 	*/
 };
-//ƒpƒ‰ƒ[ƒ^[’l\‘¢‘Ì
+class GraphPara {
+private:
+	std::vector<aGraphPara> para;
+	std::vector<frame*> f;
+public:
+	//å˜ä½å¤‰æ›é–¢æ•°
+	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
+		float b;
+		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
+		return b;
+	}
+	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
+		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
+	}
+	//æ–°è¦ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç©ºé–“ç”Ÿæˆé–¢æ•°
+	/*
+	void create_space(frame *set_f) {
+	aGraphPara empty; //ä¸€æ™‚çš„ã«ç©ºã®ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ç”Ÿæˆ
+	para.push_back(empty);
+	f.push_back(set_f);
+	}
+	*/
+	//æ–°è¦ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿è¿½åŠ é–¢æ•°
+	void create_para(float num, int index, int dim, char mode) {
+		//æ¬¡å…ƒæ•°ãŒè¶³ã‚Šãªã‘ã‚Œã°è¿½åŠ 
+		if (para[index].para.size() <= dim) {
+			std::vector<float> empty;
+			para[index].para.push_back(empty);
+			para[index].min.push_back(-1);
+			para[index].max.push_back(-1);
+		}
+		para[index].para[dim].push_back(num);
+		switch (mode) {
+		case 1:
+			para[index].min[dim] = para[index].para[index].size() - 1;
+			break;
+		case 2:
+			para[index].max[dim] = para[index].para[index].size() - 1;
+			break;
+		}
+	}
+	//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿å–å¾—é–¢æ•°
+	float get_para(int index, int dim, int dim_index) {
+		return para[index].para[dim][dim_index];
+	}
+	//æœ€å°å€¤å–å¾—é–¢æ•°
+	float get_min(int index, int dim) {
+		return para[index].min[dim];
+	}
+	//æœ€å¤§å€¤å–å¾—é–¢æ•°
+	float get_max(int index, int dim) {
+		return para[index].max[dim];
+	}
+	//ãƒ•ãƒ¬ãƒ¼ãƒ åº§æ¨™å¤‰æ›é–¢æ•°
+	POINT get_pos(int index, int dim) {
+		POINT pos;
+		pos.x = (int)(percent(0.0f, 0.0f, 0.0f, 0.0f, 0.0f));
+	}
+};
+//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼å€¤æ§‹é€ ä½“
 struct VSTParameteresFrames {
 	frame root;
 	frame all;
 	frame scroll;
 	frame tone, fade;
-	//‰¹FŒn
-	frame make_auto; //©“®‚Å‰¹F‚ğ¶¬‚·‚é‚©
-	frame raw_wave_para; //‰º‹LƒCƒ“ƒfƒ“ƒg‚ğ‘©‚Ë‚é
-						 //¶”gŒ`ƒf[ƒ^”h¶
-	frame use_rawwave; //¶”gŒ`ƒf[ƒ^‚Ìg—p‚ğ‚·‚é‚©‚Ç‚¤‚©
-	frame rawwave; //¶”gŒ`‚Ìg—p•”•ª”gŒ`(ƒtƒ@ƒCƒ‹ƒ}ƒbƒsƒ“ƒO‚É‚·‚é‚©‚à(LEƒÖEM))
-	frame base_pitch; //Šî‰¹ˆÊ’u(è“®•ÏX‰Â)
-	frame tone_para; //‰º‹LƒCƒ“ƒfƒ“ƒg‚ÌƒtƒŒ[ƒ€‚ğ‘©‚Ë‚é
-	frame change_natural; //‰¹’ö•Ï‰»‚ğ©‘R‚É‚·‚é‚©
-	frame overtones; //”{‰¹ƒOƒ‰ƒtor‹¤–ÂƒXƒyƒNƒgƒ‹ƒOƒ‰ƒt
-	frame iovertones; //”{‰¹‚Ì”
-	frame wave_type; //Šî–{”gŒ`‚ÌŒ`
-					 //Ä¶’†•ÏX‚Å‚«‚é‚Æ•Ö—˜‚Èƒpƒ‰ƒ[ƒ^[
+	//éŸ³è‰²ç³»
+	frame make_auto; //è‡ªå‹•ã§éŸ³è‰²ã‚’ç”Ÿæˆã™ã‚‹ã‹
+	frame raw_wave_para; //ä¸‹è¨˜ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã‚’æŸã­ã‚‹
+						 //ç”Ÿæ³¢å½¢ãƒ‡ãƒ¼ã‚¿æ´¾ç”Ÿ
+	frame use_rawwave; //ç”Ÿæ³¢å½¢ãƒ‡ãƒ¼ã‚¿ã®ä½¿ç”¨ã‚’ã™ã‚‹ã‹ã©ã†ã‹
+	frame rawwave; //ç”Ÿæ³¢å½¢ã®ä½¿ç”¨éƒ¨åˆ†æ³¢å½¢(ãƒ•ã‚¡ã‚¤ãƒ«ãƒãƒƒãƒ”ãƒ³ã‚°ã«ã™ã‚‹ã‹ã‚‚(Â´ãƒ»Ï‰ãƒ»ï½€))
+	frame base_pitch; //åŸºéŸ³ä½ç½®(æ‰‹å‹•å¤‰æ›´å¯)
+	frame tone_para; //ä¸‹è¨˜ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æŸã­ã‚‹
+	frame change_natural; //éŸ³ç¨‹å¤‰åŒ–ã‚’è‡ªç„¶ã«ã™ã‚‹ã‹
+	frame overtones; //å€éŸ³ã‚°ãƒ©ãƒ•orå…±é³´ã‚¹ãƒšã‚¯ãƒˆãƒ«ã‚°ãƒ©ãƒ•
+	frame iovertones; //å€éŸ³ã®æ•°
+	frame wave_type; //åŸºæœ¬æ³¢å½¢ã®å½¢
+					 //å†ç”Ÿä¸­å¤‰æ›´ã§ãã‚‹ã¨ä¾¿åˆ©ãªãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼
 	frame hostpar;
 	frame vol;
-	frame pitch; //MIDI’l‚É‰ÁZ
-				 //”gŒ`‚Ìâ‘Î’l‚ÌãŒÀ
+	frame pitch; //MIDIå€¤ã«åŠ ç®—
+				 //æ³¢å½¢ã®çµ¶å¯¾å€¤ã®ä¸Šé™
 	frame wave_limit;
-	//¶¬”gŒ`
-	frame outwave; //o—Í‚³‚ê‚é”gŒ`
-				   //ƒtƒF[ƒhŒn
-	frame use_string_mode; //Œ·ƒ‚[ƒh‚Ìg—p‚ğ‚·‚é‚©‚Ç‚¤‚©
-	frame use_fade_change; //‚È‚ß‚ç‚©‚È‰¹’ö,‰¹—Ê‚Ì•Ï‰»‚ğg—p‚·‚é‚©‚Ç‚¤‚©(2‚Â“¯‚É‰¹‚ğo‚¹‚È‚¢)
+	//ç”Ÿæˆæ³¢å½¢
+	frame outwave; //å‡ºåŠ›ã•ã‚Œã‚‹æ³¢å½¢
+				   //ãƒ•ã‚§ãƒ¼ãƒ‰ç³»
+	frame use_string_mode; //å¼¦ãƒ¢ãƒ¼ãƒ‰ã®ä½¿ç”¨ã‚’ã™ã‚‹ã‹ã©ã†ã‹
+	frame use_fade_change; //ãªã‚ã‚‰ã‹ãªéŸ³ç¨‹,éŸ³é‡ã®å¤‰åŒ–ã‚’ä½¿ç”¨ã™ã‚‹ã‹ã©ã†ã‹(2ã¤åŒæ™‚ã«éŸ³ã‚’å‡ºã›ãªã„)
 	frame fadein;
 	frame fadein_vol;
 	frame fadein_pitch;
@@ -402,28 +359,28 @@ struct VSTParameteresFrames {
 	frame fadechange_vol;
 	frame fadechange_pitch;
 };
-//RECT‚ÌfloatŒ^”Å
+//RECTã®floatå‹ç‰ˆ
 struct RECTF {
 	float left;
 	float top;
 	float right;
 	float bottom;
 };
-//Šeƒpƒ‰ƒ[ƒ^[‚Ì•\¦”ÍˆÍ
+//å„ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ã®è¡¨ç¤ºç¯„å›²
 struct VSTParameteresLength {
 	RECTF rawwave;
 	RECTF base_pitch;
 	RECTF overtones;
 };
 struct animation {
-	float click; //ƒNƒŠƒbƒNƒ‚[ƒVƒ‡ƒ“
-	float on; //ƒ}ƒEƒX‚ªd‚È‚Á‚½‚Æ‚«‚Ìƒ‚[ƒVƒ‡ƒ“
+	float click; //ã‚¯ãƒªãƒƒã‚¯ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
+	float on; //ãƒã‚¦ã‚¹ãŒé‡ãªã£ãŸã¨ãã®ãƒ¢ãƒ¼ã‚·ãƒ§ãƒ³
 };
 
-//ƒ†[ƒeƒBƒŠƒeƒBƒNƒ‰ƒX
+//ãƒ¦ãƒ¼ãƒ†ã‚£ãƒªãƒ†ã‚£ã‚¯ãƒ©ã‚¹
 class Utility {
 public:
-	//Š„‡•ÏŠ·ŠÖ”(–ß‚è’l:•ÏŠ·Œã,ˆø”1~5:•ÏŠ·‘O‚Ì’l,•ÏŠ·‘O‚ÌÅ¬’l,•ÏŠ·‘O‚ÌÅ‘å’l,•ÏŠ·Œã‚ÌÅ¬’l,•ÏŠ·Œã‚ÌÅ‘å’l)
+	//å‰²åˆå¤‰æ›é–¢æ•°(æˆ»ã‚Šå€¤:å¤‰æ›å¾Œ,å¼•æ•°1~5:å¤‰æ›å‰ã®å€¤,å¤‰æ›å‰ã®æœ€å°å€¤,å¤‰æ›å‰ã®æœ€å¤§å€¤,å¤‰æ›å¾Œã®æœ€å°å€¤,å¤‰æ›å¾Œã®æœ€å¤§å€¤)
 	static double Proportion(double i, double i_mix, double i_max, double j_min, double j_max) {
 		double j;
 		j = j_min + (i - i_mix) * ((j_max - j_min) / (i_max - i_mix));
@@ -436,125 +393,125 @@ public:
 	}
 };
 
-//‹¤—Lƒƒ‚ƒŠƒAƒNƒZƒXƒNƒ‰ƒX
+//å…±æœ‰ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹ã‚¯ãƒ©ã‚¹
 class ShareMem {
 public:
-	//•Ï”‰Šú‰»
-	HANDLE MapHandle = nullptr; //ƒ}ƒbƒv‚Ìƒnƒ“ƒhƒ‹
-	ShareMemData *smd = nullptr; //‹¤—Lƒƒ‚ƒŠƒf[ƒ^ƒ|ƒCƒ“ƒ^
-	int ShareMemSize = sizeof(ShareMemData); //ƒ}ƒbƒv‚ÌƒTƒCƒY
+	//å¤‰æ•°åˆæœŸåŒ–
+	HANDLE MapHandle = nullptr; //ãƒãƒƒãƒ—ã®ãƒãƒ³ãƒ‰ãƒ«
+	ShareMemData *smd = nullptr; //å…±æœ‰ãƒ¡ãƒ¢ãƒªãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿
+	int ShareMemSize = sizeof(ShareMemData); //ãƒãƒƒãƒ—ã®ã‚µã‚¤ã‚º
 
-											 //ŠÖ”éŒ¾
-	bool Open(LPCTSTR MapName) { //‹¤—Lƒƒ‚ƒŠƒAƒNƒZƒXŠÖ”
-		if (MapName == nullptr) { //ƒRƒ“ƒ\[ƒ‹ˆø”‚ª‚È‚¯‚ê‚ÎƒGƒ‰[
+											 //é–¢æ•°å®£è¨€
+	bool Open(LPCTSTR MapName) { //å…±æœ‰ãƒ¡ãƒ¢ãƒªã‚¢ã‚¯ã‚»ã‚¹é–¢æ•°
+		if (MapName == nullptr) { //ã‚³ãƒ³ã‚½ãƒ¼ãƒ«å¼•æ•°ãŒãªã‘ã‚Œã°ã‚¨ãƒ©ãƒ¼
 			return 1;
 		}
-		MapHandle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, MapName); //ƒtƒ@ƒCƒ‹–¼‚©‚çƒ}ƒbƒvƒnƒ“ƒhƒ‹æ“¾
-		if (MapHandle == NULL) { //ƒ}ƒbƒv‚ª‘¶İ‚µ‚Ä‚¢‚È‚¯‚ê‚ÎƒGƒ‰[
+		MapHandle = OpenFileMapping(FILE_MAP_ALL_ACCESS, FALSE, MapName); //ãƒ•ã‚¡ã‚¤ãƒ«åã‹ã‚‰ãƒãƒƒãƒ—ãƒãƒ³ãƒ‰ãƒ«å–å¾—
+		if (MapHandle == NULL) { //ãƒãƒƒãƒ—ãŒå­˜åœ¨ã—ã¦ã„ãªã‘ã‚Œã°ã‚¨ãƒ©ãƒ¼
 			return 1;
 		}
-		smd = (ShareMemData *)MapViewOfFile(MapHandle, FILE_MAP_ALL_ACCESS, 0, 0, ShareMemSize); //ƒ}ƒbƒv“à—e“¯Šú
-		if (smd == NULL) { //ƒ}ƒbƒv“à—eæ“¾‚ª‚Å‚«‚Ä‚¢‚È‚¯‚ê‚ÎƒGƒ‰[
+		smd = (ShareMemData *)MapViewOfFile(MapHandle, FILE_MAP_ALL_ACCESS, 0, 0, ShareMemSize); //ãƒãƒƒãƒ—å†…å®¹åŒæœŸ
+		if (smd == NULL) { //ãƒãƒƒãƒ—å†…å®¹å–å¾—ãŒã§ãã¦ã„ãªã‘ã‚Œã°ã‚¨ãƒ©ãƒ¼
 			return 1;
 		}
 		return 0;
 	}
-	~ShareMem() { //‹¤—Lƒƒ‚ƒŠƒNƒ[ƒY
-		UnmapViewOfFile(smd); //‹¤—Lƒƒ‚ƒŠƒf[ƒ^ƒ|ƒCƒ“ƒ^ŠJ•ú
+	~ShareMem() { //å…±æœ‰ãƒ¡ãƒ¢ãƒªã‚¯ãƒ­ãƒ¼ã‚º
+		UnmapViewOfFile(smd); //å…±æœ‰ãƒ¡ãƒ¢ãƒªãƒ‡ãƒ¼ã‚¿ãƒã‚¤ãƒ³ã‚¿é–‹æ”¾
 	}
 };
 
-//ƒtƒŒ[ƒ€‘€ìƒNƒ‰ƒX
+//ãƒ•ãƒ¬ãƒ¼ãƒ æ“ä½œã‚¯ãƒ©ã‚¹
 class Frames {
 public:
-	//ŠÖ”éŒ¾
-	//ƒtƒŒ[ƒ€’Ç‰ÁŠÖ”(ˆø”:eƒtƒŒ[ƒ€(‚È‚¯‚ê‚Înullptr),©ƒtƒŒ[ƒ€,ƒtƒŒ[ƒ€–¼,qƒtƒŒ[ƒ€‚Ì”z—ñ•û–@(0‚È‚çc,1‚È‚ç‰¡),qƒtƒŒ[ƒ€ŠÔ‚ÌŠÔŠu,©ƒtƒŒ[ƒ€‚Ì’·‚³(mode=0‚È‚ç‚‚³,1‚È‚ç•),©ƒtƒŒ[ƒ€‚ğŒÅ’èƒTƒCƒY‚É‚·‚éon/off)
+	//é–¢æ•°å®£è¨€
+	//ãƒ•ãƒ¬ãƒ¼ãƒ è¿½åŠ é–¢æ•°(å¼•æ•°:è¦ªãƒ•ãƒ¬ãƒ¼ãƒ (ãªã‘ã‚Œã°nullptr),è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ,ãƒ•ãƒ¬ãƒ¼ãƒ å,å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®é…åˆ—æ–¹æ³•(0ãªã‚‰ç¸¦,1ãªã‚‰æ¨ª),å­ãƒ•ãƒ¬ãƒ¼ãƒ é–“ã®é–“éš”,è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®é•·ã•(mode=0ãªã‚‰é«˜ã•,1ãªã‚‰å¹…),è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã‚’å›ºå®šã‚µã‚¤ã‚ºã«ã™ã‚‹on/off)
 	void add(frame *parent, frame *self, std::string name, int length, bool lock) {
-		self->parent = parent; //eƒtƒŒ[ƒ€‚Ìƒ|ƒCƒ“ƒ^
-		self->num_child = 0; //qƒtƒŒ[ƒ€‚Ì”‰Šú‰»
-		self->pos.left = 0; //ƒtƒŒ[ƒ€¶À•W
-		self->pos.top = 0; //ƒtƒŒ[ƒ€ãÀ•W
-		self->pos.right = 0; //ƒtƒŒ[ƒ€‰EÀ•W
-		self->pos.bottom = 0; //ƒtƒŒ[ƒ€‰ºÀ•W
-		self->size = { 0,0 }; //ƒtƒŒ[ƒ€ƒTƒCƒY
-		self->name = name; //ƒtƒŒ[ƒ€‚Ì–¼Ì
-		self->mode = 0; //qƒtƒŒ[ƒ€‚ªc•À‚Ñ=0,‰¡•À‚Ñ=1
-		self->gap = 0; //qƒtƒŒ[ƒ€ŠÔ“¯m‚ÌŒ„ŠÔ(px’PˆÊ)
-		self->length = length; //‘SƒtƒŒ[ƒ€‚ª‰Šú’lƒTƒCƒY‚Ì©ƒtƒŒ[ƒ€‚ÌƒTƒCƒY
-		self->lock = lock; //Œ»İ‚Ì©ƒtƒŒ[ƒ€‚Ì’·‚³(mode = 0‚È‚çc•, mode = 1‚È‚ç‰¡•)‚ÌŒÅ’è‚Ìon/off
+		self->parent = parent; //è¦ªãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒã‚¤ãƒ³ã‚¿
+		self->num_child = 0; //å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®æ•°åˆæœŸåŒ–
+		self->pos.left = 0; //ãƒ•ãƒ¬ãƒ¼ãƒ å·¦åº§æ¨™
+		self->pos.top = 0; //ãƒ•ãƒ¬ãƒ¼ãƒ ä¸Šåº§æ¨™
+		self->pos.right = 0; //ãƒ•ãƒ¬ãƒ¼ãƒ å³åº§æ¨™
+		self->pos.bottom = 0; //ãƒ•ãƒ¬ãƒ¼ãƒ ä¸‹åº§æ¨™
+		self->size = { 0,0 }; //ãƒ•ãƒ¬ãƒ¼ãƒ ã‚µã‚¤ã‚º
+		self->name = name; //ãƒ•ãƒ¬ãƒ¼ãƒ ã®åç§°
+		self->mode = 0; //å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒç¸¦ä¸¦ã³=0,æ¨ªä¸¦ã³=1
+		self->gap = 0; //å­ãƒ•ãƒ¬ãƒ¼ãƒ é–“åŒå£«ã®éš™é–“(pxå˜ä½)
+		self->length = length; //å…¨ãƒ•ãƒ¬ãƒ¼ãƒ ãŒåˆæœŸå€¤ã‚µã‚¤ã‚ºæ™‚ã®è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®ã‚µã‚¤ã‚º
+		self->lock = lock; //ç¾åœ¨ã®è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®é•·ã•(mode = 0ãªã‚‰ç¸¦å¹…, mode = 1ãªã‚‰æ¨ªå¹…)ã®å›ºå®šã®on/off
 		self->index = 0;
-		self->lock_length = 0; //ŒÅ’èƒTƒCƒY‚Ì‘SqƒtƒŒ[ƒ€‚Æ‘Sgap‚Ì˜a(––’[ƒtƒŒ[ƒ€‚Í0‚ğ‘ã“ü)
-							   //eƒtƒŒ[ƒ€‚ª–¢w’è‚Ìê‡AˆÈ‰º‚Ìˆ—‚ğÈ‚­
+		self->lock_length = 0; //å›ºå®šã‚µã‚¤ã‚ºã®å…¨å­ãƒ•ãƒ¬ãƒ¼ãƒ ã¨å…¨gapã®å’Œ(æœ«ç«¯ãƒ•ãƒ¬ãƒ¼ãƒ ã¯0ã‚’ä»£å…¥)
+							   //è¦ªãƒ•ãƒ¬ãƒ¼ãƒ ãŒæœªæŒ‡å®šã®å ´åˆã€ä»¥ä¸‹ã®å‡¦ç†ã‚’çœã
 		if (parent == nullptr) {
 			return;
 		}
-		self->parent->childs.push_back(self); //eƒtƒŒ[ƒ€‚É©ƒtƒŒ[ƒ€’Ç‰Á“o˜^
-		self->index = self->parent->num_child;//“¯ƒtƒŒ[ƒ€“à‚Ì©ƒtƒŒ[ƒ€‚ÌŠ„“–”Ô†(=0,1,2,3,...)
-		self->parent->num_child += 1; //eƒtƒŒ[ƒ€î•ñXV
+		self->parent->childs.push_back(self); //è¦ªãƒ•ãƒ¬ãƒ¼ãƒ ã«è‡ªãƒ•ãƒ¬ãƒ¼ãƒ è¿½åŠ ç™»éŒ²
+		self->index = self->parent->num_child;//åŒãƒ•ãƒ¬ãƒ¼ãƒ å†…ã®è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®å‰²å½“ç•ªå·(=0,1,2,3,...)
+		self->parent->num_child += 1; //è¦ªãƒ•ãƒ¬ãƒ¼ãƒ æƒ…å ±æ›´æ–°
 		return;
 	}
 	void set_parent(frame *self, bool mode, int gap) {
-		self->mode = mode; //qƒtƒŒ[ƒ€‚ª‰¡•À‚Ñ‚È‚ç0,c•À‚Ñ‚È‚ç1
-		self->gap = gap; //¬ƒtƒŒ[ƒ€ŠÔ‚ÌŒ„ŠÔƒTƒCƒY(px’PˆÊ)
+		self->mode = mode; //å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒæ¨ªä¸¦ã³ãªã‚‰0,ç¸¦ä¸¦ã³ãªã‚‰1
+		self->gap = gap; //å°ãƒ•ãƒ¬ãƒ¼ãƒ é–“ã®éš™é–“ã‚µã‚¤ã‚º(pxå˜ä½)
 		return;
 	}
-	//‘SƒtƒŒ[ƒ€‚Ì“o˜^Š®—¹‚ÉA––’[ƒtƒŒ[ƒ€‚©‚ç‘SeƒtƒŒ[ƒ€‚Ìlength“™æ“¾ŠÖ”
+	//å…¨ãƒ•ãƒ¬ãƒ¼ãƒ ã®ç™»éŒ²å®Œäº†æ™‚ã«ã€æœ«ç«¯ãƒ•ãƒ¬ãƒ¼ãƒ ã‹ã‚‰å…¨è¦ªãƒ•ãƒ¬ãƒ¼ãƒ ã®lengthç­‰å–å¾—é–¢æ•°
 	void get_length(frame *f) {
 		if (f->num_child != 0) {
-			f->length = 0; //‘SqƒtƒŒ[ƒ€‚Æ‘Sgap‚Ì˜a
-			f->lock_length = 0; //ŒÅ’èƒTƒCƒY‚Ì‘SqƒtƒŒ[ƒ€‚Æ‘Sgap‚Ì˜a(––’[ƒtƒŒ[ƒ€‚Í0‚ğ‘ã“ü)
-								//qƒtƒŒ[ƒ€‚ÌŒÂ”•ªƒ‹[ƒv
+			f->length = 0; //å…¨å­ãƒ•ãƒ¬ãƒ¼ãƒ ã¨å…¨gapã®å’Œ
+			f->lock_length = 0; //å›ºå®šã‚µã‚¤ã‚ºã®å…¨å­ãƒ•ãƒ¬ãƒ¼ãƒ ã¨å…¨gapã®å’Œ(æœ«ç«¯ãƒ•ãƒ¬ãƒ¼ãƒ ã¯0ã‚’ä»£å…¥)
+								//å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®å€‹æ•°åˆ†ãƒ«ãƒ¼ãƒ—
 			for (int i = 0; i < f->num_child; i++) {
-				//qƒtƒŒ[ƒ€‚ªqƒtƒŒ[ƒ€‚ğ‚Á‚Ä‚¢‚½ê‡AÄ‹A
+				//å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒå­ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æŒã£ã¦ã„ãŸå ´åˆã€å†å¸°
 				if (f->childs[i]->num_child != 0) {
 					get_length(f->childs[i]);
 				}
-				//eƒtƒŒ[ƒ€‚Ì’·‚³‚ÉqƒtƒŒ[ƒ€‚Ì’·‚³‚ğ‘«‚µ‚Ä‚¢‚­
+				//è¦ªãƒ•ãƒ¬ãƒ¼ãƒ ã®é•·ã•ã«å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®é•·ã•ã‚’è¶³ã—ã¦ã„ã
 				f->length += f->childs[i]->length;
-				//‚à‚µqƒtƒŒ[ƒ€‚ª––’[ƒtƒŒ[ƒ€‚ÅAŒÅ’èƒTƒCƒYƒtƒŒ[ƒ€‚Ìê‡
+				//ã‚‚ã—å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒæœ«ç«¯ãƒ•ãƒ¬ãƒ¼ãƒ ã§ã€å›ºå®šã‚µã‚¤ã‚ºãƒ•ãƒ¬ãƒ¼ãƒ ã®å ´åˆ
 				if (f->childs[i]->lock) {
 					f->lock_length += f->childs[i]->length;
 				}
 			}
-			//‘Sgap‚ğ‘«‚·
+			//å…¨gapã‚’è¶³ã™
 			f->length += f->gap * (f->num_child + 1);
 			f->lock_length += f->gap * (f->num_child + 1);
 		}
 		return;
 	}
-	//‘SƒtƒŒ[ƒ€‚ÌˆÊ’uZo(ˆø”1,2,3:©ƒtƒŒ[ƒ€‚Ìƒ|ƒCƒ“ƒ^,©ƒtƒŒ[ƒ€‚ğ•`‰æ‚·‚éˆÊ’u,0‚È‚ç’·‚³‚Í‰Šú’l‚Ì‚Ü‚Ü)
+	//å…¨ãƒ•ãƒ¬ãƒ¼ãƒ ã®ä½ç½®ç®—å‡º(å¼•æ•°1,2,3:è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã®ãƒã‚¤ãƒ³ã‚¿,è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æç”»ã™ã‚‹ä½ç½®,0ãªã‚‰é•·ã•ã¯åˆæœŸå€¤ã®ã¾ã¾)
 	void resize(frame *f, RECT pos) {
 		f->size.x = pos.right - pos.left;
 		f->size.y = pos.bottom - pos.top;
 		f->pos = pos;
-		//qƒtƒŒ[ƒ€‚ª‚ ‚ê‚ÎAqƒtƒŒ[ƒ€‚Ì”z’u‚à‚µ‚Ä‚¨‚­
+		//å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒã‚ã‚Œã°ã€å­ãƒ•ãƒ¬ãƒ¼ãƒ ã®é…ç½®ã‚‚ã—ã¦ãŠã
 		if (f->num_child != 0) {
 			if (f->mode) {
-				//‰¡•À‚Ñ‚Ìê‡
-				//qƒtƒŒ[ƒ€•ªƒ‹[ƒv
+				//æ¨ªä¸¦ã³ã®å ´åˆ
+				//å­ãƒ•ãƒ¬ãƒ¼ãƒ åˆ†ãƒ«ãƒ¼ãƒ—
 				for (int i = 0; i < f->num_child; i++) {
-					//iŒÂ–Ú‚ÌqƒtƒŒ[ƒ€ˆÊ’u•Ï”‰Šú‰»
+					//iå€‹ç›®ã®å­ãƒ•ãƒ¬ãƒ¼ãƒ ä½ç½®å¤‰æ•°åˆæœŸåŒ–
 					RECT child_pos;
-					//iŒÂ–Ú‚ÌqƒtƒŒ[ƒ€ˆÊ’uZo
-					//ã‰ºˆÊ’u
+					//iå€‹ç›®ã®å­ãƒ•ãƒ¬ãƒ¼ãƒ ä½ç½®ç®—å‡º
+					//ä¸Šä¸‹ä½ç½®
 					child_pos.top = f->pos.top + f->gap;
 					child_pos.bottom = f->pos.bottom - f->gap;
-					//¶ˆÊ’u
+					//å·¦ä½ç½®
 					if (i == 0) {
 						child_pos.left = f->pos.left + f->gap;
 					}
 					else {
 						child_pos.left = f->childs[i - 1]->pos.right + f->gap;
 					}
-					//‰EˆÊ’u
+					//å³ä½ç½®
 					if (f->childs[i]->lock) {
-						//ŒÅ’èƒTƒCƒYƒtƒŒ[ƒ€‚Ìê‡‚ÍŠ„‡•ÏŠ·•s—v
+						//å›ºå®šã‚µã‚¤ã‚ºãƒ•ãƒ¬ãƒ¼ãƒ ã®å ´åˆã¯å‰²åˆå¤‰æ›ä¸è¦
 						child_pos.right =
 							child_pos.left +
 							f->childs[i]->length;
 					}
 					else {
-						//”ñŒÅ’èƒTƒCƒYƒtƒŒ[ƒ€‚Ìê‡‚ÍŠ„‡ŒvZ
+						//éå›ºå®šã‚µã‚¤ã‚ºãƒ•ãƒ¬ãƒ¼ãƒ ã®å ´åˆã¯å‰²åˆè¨ˆç®—
 						child_pos.right =
 							child_pos.left +
 							Utility::Proportion(
@@ -565,36 +522,36 @@ public:
 								f->size.x - f->lock_length
 							);
 					}
-					//qƒtƒŒ[ƒ€ˆÊ’uİ’è
+					//å­ãƒ•ãƒ¬ãƒ¼ãƒ ä½ç½®è¨­å®š
 					resize(f->childs[i], child_pos);
 				}
 			}
 			else {
-				//c•À‚Ñ‚Ìê‡
-				//qƒtƒŒ[ƒ€•ªƒ‹[ƒv
+				//ç¸¦ä¸¦ã³ã®å ´åˆ
+				//å­ãƒ•ãƒ¬ãƒ¼ãƒ åˆ†ãƒ«ãƒ¼ãƒ—
 				for (int i = 0; i < f->num_child; i++) {
-					//iŒÂ–Ú‚ÌqƒtƒŒ[ƒ€ˆÊ’u•Ï”‰Šú‰»
+					//iå€‹ç›®ã®å­ãƒ•ãƒ¬ãƒ¼ãƒ ä½ç½®å¤‰æ•°åˆæœŸåŒ–
 					RECT child_pos;
-					//iŒÂ–Ú‚ÌqƒtƒŒ[ƒ€ˆÊ’uZo
-					//¶‰EˆÊ’u
+					//iå€‹ç›®ã®å­ãƒ•ãƒ¬ãƒ¼ãƒ ä½ç½®ç®—å‡º
+					//å·¦å³ä½ç½®
 					child_pos.left = f->pos.left + f->gap;
 					child_pos.right = f->pos.right - f->gap;
-					//ãˆÊ’u
+					//ä¸Šä½ç½®
 					if (i == 0) {
 						child_pos.top = f->pos.top + f->gap;
 					}
 					else {
 						child_pos.top = f->childs[i - 1]->pos.bottom + f->gap;
 					}
-					//‰ºˆÊ’u
+					//ä¸‹ä½ç½®
 					if (f->childs[i]->lock) {
-						//ŒÅ’èƒTƒCƒYƒtƒŒ[ƒ€orƒXƒNƒ[ƒ‹‰ÂƒtƒŒ[ƒ€‚Ìê‡‚ÍŠ„‡•ÏŠ·•s—v
+						//å›ºå®šã‚µã‚¤ã‚ºãƒ•ãƒ¬ãƒ¼ãƒ orã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«å¯ãƒ•ãƒ¬ãƒ¼ãƒ ã®å ´åˆã¯å‰²åˆå¤‰æ›ä¸è¦
 						child_pos.bottom =
 							child_pos.top +
 							f->childs[i]->length;
 					}
 					else {
-						//”ñŒÅ’èƒTƒCƒYƒtƒŒ[ƒ€‚Ìê‡‚ÍŠ„‡ŒvZ
+						//éå›ºå®šã‚µã‚¤ã‚ºãƒ•ãƒ¬ãƒ¼ãƒ ã®å ´åˆã¯å‰²åˆè¨ˆç®—
 						child_pos.bottom =
 							child_pos.top +
 							Utility::Proportion(
@@ -605,21 +562,21 @@ public:
 								f->size.y - f->lock_length
 							);
 					}
-					//qƒtƒŒ[ƒ€ˆÊ’uİ’è
+					//å­ãƒ•ãƒ¬ãƒ¼ãƒ ä½ç½®è¨­å®š
 					resize(f->childs[i], child_pos);
 				}
 			}
 		}
 		return;
 	}
-	//w’èƒtƒŒ[ƒ€ˆÈ‰º‚Ì‚·‚×‚Ä‚ÌƒtƒŒ[ƒ€‚ÅdisposeÀs
+	//æŒ‡å®šãƒ•ãƒ¬ãƒ¼ãƒ ä»¥ä¸‹ã®ã™ã¹ã¦ã®ãƒ•ãƒ¬ãƒ¼ãƒ ã§disposeå®Ÿè¡Œ
 	void all_dispose(frame *f) {
 		dispose(f);
 		for (int i = 0; i < f->childs.size(); i++) {
 			all_dispose(f->childs[i]);
 		}
 	}
-	//ƒtƒŒ[ƒ€“à‚Ånew‚µ‚½ƒNƒ‰ƒX‚ğ‚·‚×‚Ädelete‚·‚éŠÖ”
+	//ãƒ•ãƒ¬ãƒ¼ãƒ å†…ã§newã—ãŸã‚¯ãƒ©ã‚¹ã‚’ã™ã¹ã¦deleteã™ã‚‹é–¢æ•°
 	void dispose(frame *f) {
 		for (int i = 0; i < f->data.size(); i++) {
 			delete f->data[i];
@@ -627,43 +584,43 @@ public:
 	}
 };
 
-//ƒpƒ‰ƒ[ƒ^[‚Ì’l‚âƒtƒŒ[ƒ€•Ï”ŠÇ—ƒNƒ‰ƒX
+//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ã®å€¤ã‚„ãƒ•ãƒ¬ãƒ¼ãƒ å¤‰æ•°ç®¡ç†ã‚¯ãƒ©ã‚¹
 class Parameteres {
 public:
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒg
-	Frames frames; //ƒtƒŒ[ƒ€‘€ìƒNƒ‰ƒX
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
+	Frames frames; //ãƒ•ãƒ¬ãƒ¼ãƒ æ“ä½œã‚¯ãƒ©ã‚¹
 
-				   //•Ï”‰Šú‰»
-	VSTParameteres *p_value; //ƒpƒ‰ƒ[ƒ^[’l•Ï”ŒQƒ|ƒCƒ“ƒ^
-	VSTParameteresFrames p_frame; //ƒpƒ‰ƒ[ƒ^[ƒtƒŒ[ƒ€•Ï”ŒQ
-	VSTParameteresLength p_length; //ƒpƒ‰ƒ[ƒ^[•\¦”ÍˆÍ•Ï”ŒQ
+				   //å¤‰æ•°åˆæœŸåŒ–
+	VSTParameteres *p_value; //ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼å€¤å¤‰æ•°ç¾¤ãƒã‚¤ãƒ³ã‚¿
+	VSTParameteresFrames p_frame; //ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼ãƒ•ãƒ¬ãƒ¼ãƒ å¤‰æ•°ç¾¤
+	VSTParameteresLength p_length; //ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼è¡¨ç¤ºç¯„å›²å¤‰æ•°ç¾¤
 
-	//ŠÖ”éŒ¾
-	Parameteres() { //‘Sƒpƒ‰ƒ[ƒ^[•ª‚ÌƒtƒŒ[ƒ€ì¬
-		//ƒtƒŒ[ƒ€¶¬
+	//é–¢æ•°å®£è¨€
+	Parameteres() { //å…¨ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼åˆ†ã®ãƒ•ãƒ¬ãƒ¼ãƒ ä½œæˆ
+		//ãƒ•ãƒ¬ãƒ¼ãƒ ç”Ÿæˆ
 		//frames.add(frame *parent, frame *self, std::string name, int length, bool lock)
 		frames.add(nullptr, &p_frame.root, "root", 0, 0);
 		frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
 		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
-		frames.add(&p_frame.all, &p_frame.tone, "tone", 0, 0); //‰¹Fİ’èƒtƒŒ[ƒ€¶¬
-		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 100, 0); //©“®‚Å‰¹F‚ğ¶¬‚·‚é‚©
-		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 0); //‰º‹LƒCƒ“ƒfƒ“ƒg‚ğ‘©‚Ë‚é
-		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 100, 0); //¶”gŒ`ƒf[ƒ^‚Ìg—p‚ğ‚·‚é‚©‚Ç‚¤‚©
-		frames.add(&p_frame.raw_wave_para, &p_frame.rawwave, "rawwave", 100, 0); //¶”gŒ`‚Ìg—p•”•ª”gŒ`(ƒtƒ@ƒCƒ‹ƒ}ƒbƒsƒ“ƒO‚É‚·‚é‚©‚à(LEƒÖEM))
-		frames.add(&p_frame.raw_wave_para, &p_frame.base_pitch, "base_pitch", 100, 0); //Šî‰¹ˆÊ’u(è“®•ÏX‰Â)
-		frames.add(&p_frame.tone, &p_frame.tone_para, "tone_para", 0, 0); //‰º‹LƒCƒ“ƒfƒ“ƒg‚ÌƒtƒŒ[ƒ€‚ğ‘©‚Ë‚é
-		frames.add(&p_frame.tone_para, &p_frame.change_natural, "change_natural", 100, 0); //‰¹’ö•Ï‰»‚ğ©‘R‚É‚·‚é‚©
-		frames.add(&p_frame.tone_para, &p_frame.overtones, "overtones", 100, 0); //”{‰¹ƒOƒ‰ƒtor‹¤–ÂƒXƒyƒNƒgƒ‹ƒOƒ‰ƒt
-		frames.add(&p_frame.tone_para, &p_frame.iovertones, "iovertones", 100, 0); //”{‰¹‚Ì”
-		frames.add(&p_frame.tone_para, &p_frame.wave_type, "wave_type", 100, 0); //Šî–{”gŒ`‚ÌŒ`
-		frames.add(&p_frame.tone_para, &p_frame.hostpar, "hostpar", 0, 0); //‰º‹LƒCƒ“ƒfƒ“ƒg‚ÌƒtƒŒ[ƒ€‚ğ‘©‚Ë‚é
-		frames.add(&p_frame.hostpar, &p_frame.vol, "vol", 100, 0); //‰¹—Ê
-		frames.add(&p_frame.hostpar, &p_frame.pitch, "pitch", 100, 0); //‰¹’ö(IDI’l‚É‰ÁZ)
-		frames.add(&p_frame.tone, &p_frame.wave_limit, "wave_limit", 100, 0); //”gŒ`‚Ìâ‘Î’l‚ÌãŒÀ
-		frames.add(&p_frame.tone, &p_frame.outwave, "outwave", 100, 0); //o—Í”gŒ`
-		frames.add(&p_frame.all, &p_frame.fade, "fade", 0, 0); //ƒtƒF[ƒhİ’èƒtƒŒ[ƒ€¶¬
-		frames.add(&p_frame.fade, &p_frame.use_string_mode, "use_string_mode", 100, 0); //Œ·ƒ‚[ƒh‚Ìg—p‚ğ‚·‚é‚©‚Ç‚¤‚©
-		frames.add(&p_frame.fade, &p_frame.use_fade_change, "use_fade_change", 100, 0); //‚È‚ß‚ç‚©‚È‰¹’ö,‰¹—Ê‚Ì•Ï‰»‚ğg—p‚·‚é‚©‚Ç‚¤‚©(2‚Â“¯‚É‰¹‚ğo‚¹‚È‚¢)
+		frames.add(&p_frame.all, &p_frame.tone, "tone", 0, 0); //éŸ³è‰²è¨­å®šãƒ•ãƒ¬ãƒ¼ãƒ ç”Ÿæˆ
+		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 100, 0); //è‡ªå‹•ã§éŸ³è‰²ã‚’ç”Ÿæˆã™ã‚‹ã‹
+		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 0); //ä¸‹è¨˜ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã‚’æŸã­ã‚‹
+		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 100, 0); //ç”Ÿæ³¢å½¢ãƒ‡ãƒ¼ã‚¿ã®ä½¿ç”¨ã‚’ã™ã‚‹ã‹ã©ã†ã‹
+		frames.add(&p_frame.raw_wave_para, &p_frame.rawwave, "rawwave", 100, 0); //ç”Ÿæ³¢å½¢ã®ä½¿ç”¨éƒ¨åˆ†æ³¢å½¢(ãƒ•ã‚¡ã‚¤ãƒ«ãƒãƒƒãƒ”ãƒ³ã‚°ã«ã™ã‚‹ã‹ã‚‚(Â´ãƒ»Ï‰ãƒ»ï½€))
+		frames.add(&p_frame.raw_wave_para, &p_frame.base_pitch, "base_pitch", 100, 0); //åŸºéŸ³ä½ç½®(æ‰‹å‹•å¤‰æ›´å¯)
+		frames.add(&p_frame.tone, &p_frame.tone_para, "tone_para", 0, 0); //ä¸‹è¨˜ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æŸã­ã‚‹
+		frames.add(&p_frame.tone_para, &p_frame.change_natural, "change_natural", 100, 0); //éŸ³ç¨‹å¤‰åŒ–ã‚’è‡ªç„¶ã«ã™ã‚‹ã‹
+		frames.add(&p_frame.tone_para, &p_frame.overtones, "overtones", 100, 0); //å€éŸ³ã‚°ãƒ©ãƒ•orå…±é³´ã‚¹ãƒšã‚¯ãƒˆãƒ«ã‚°ãƒ©ãƒ•
+		frames.add(&p_frame.tone_para, &p_frame.iovertones, "iovertones", 100, 0); //å€éŸ³ã®æ•°
+		frames.add(&p_frame.tone_para, &p_frame.wave_type, "wave_type", 100, 0); //åŸºæœ¬æ³¢å½¢ã®å½¢
+		frames.add(&p_frame.tone_para, &p_frame.hostpar, "hostpar", 0, 0); //ä¸‹è¨˜ã‚¤ãƒ³ãƒ‡ãƒ³ãƒˆã®ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æŸã­ã‚‹
+		frames.add(&p_frame.hostpar, &p_frame.vol, "vol", 100, 0); //éŸ³é‡
+		frames.add(&p_frame.hostpar, &p_frame.pitch, "pitch", 100, 0); //éŸ³ç¨‹(IDIå€¤ã«åŠ ç®—)
+		frames.add(&p_frame.tone, &p_frame.wave_limit, "wave_limit", 100, 0); //æ³¢å½¢ã®çµ¶å¯¾å€¤ã®ä¸Šé™
+		frames.add(&p_frame.tone, &p_frame.outwave, "outwave", 100, 0); //å‡ºåŠ›æ³¢å½¢
+		frames.add(&p_frame.all, &p_frame.fade, "fade", 0, 0); //ãƒ•ã‚§ãƒ¼ãƒ‰è¨­å®šãƒ•ãƒ¬ãƒ¼ãƒ ç”Ÿæˆ
+		frames.add(&p_frame.fade, &p_frame.use_string_mode, "use_string_mode", 100, 0); //å¼¦ãƒ¢ãƒ¼ãƒ‰ã®ä½¿ç”¨ã‚’ã™ã‚‹ã‹ã©ã†ã‹
+		frames.add(&p_frame.fade, &p_frame.use_fade_change, "use_fade_change", 100, 0); //ãªã‚ã‚‰ã‹ãªéŸ³ç¨‹,éŸ³é‡ã®å¤‰åŒ–ã‚’ä½¿ç”¨ã™ã‚‹ã‹ã©ã†ã‹(2ã¤åŒæ™‚ã«éŸ³ã‚’å‡ºã›ãªã„)
 		frames.add(&p_frame.fade, &p_frame.fadein, "fadein", 0, 0);
 		frames.add(&p_frame.fadein, &p_frame.fadein_vol, "fadein_vol", 100, 0);
 		frames.add(&p_frame.fadein, &p_frame.fadein_pitch, "fadein_pitch", 100, 0);
@@ -682,24 +639,24 @@ public:
 		frames.set_parent(&p_frame.fadechange, 1, 2);
 		frames.set_parent(&p_frame.fadechange, 1, 2);
 
-		frames.get_length(&p_frame.root); //‘SƒtƒŒ[ƒ€‚Ìlength“™æ“¾
+		frames.get_length(&p_frame.root); //å…¨ãƒ•ãƒ¬ãƒ¼ãƒ ã®lengthç­‰å–å¾—
 	}
-	//ƒfƒXƒgƒ‰ƒNƒ^
+	//ãƒ‡ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
 	~Parameteres() {
 		frames.all_dispose(&p_frame.root);
 	}
 };
 
-//ƒEƒBƒ“ƒhƒEƒCƒxƒ“ƒgˆ—ƒNƒ‰ƒX
+//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¤ãƒ™ãƒ³ãƒˆå‡¦ç†ã‚¯ãƒ©ã‚¹
 class WIN_EVENT {
 public:
-	//•Ï”éŒ¾
-	POINT mouse; //Œ»İ‚Ìƒ}ƒEƒXÀ•W
-	bool l_click; //Œ»İ‚Ì¶ƒNƒŠƒbƒNî•ñ(‰Ÿ‚³‚ê‚Ä‚¢‚½‚ç1)
-	bool b_l_click; //‘OƒtƒŒ[ƒ€‚Ìl_click•Ï”‚Ì“à—e
+	//å¤‰æ•°å®£è¨€
+	POINT mouse; //ç¾åœ¨ã®ãƒã‚¦ã‚¹åº§æ¨™
+	bool l_click; //ç¾åœ¨ã®å·¦ã‚¯ãƒªãƒƒã‚¯æƒ…å ±(æŠ¼ã•ã‚Œã¦ã„ãŸã‚‰1)
+	bool b_l_click; //å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®l_clickå¤‰æ•°ã®å†…å®¹
 
-	//ŠÖ”éŒ¾
-	//w’èRECT“à‚É‘¶İ‚·‚é‚©‚Ç‚¤‚©
+	//é–¢æ•°å®£è¨€
+	//æŒ‡å®šRECTå†…ã«å­˜åœ¨ã™ã‚‹ã‹ã©ã†ã‹
 	bool in(RECT area) {
 		if (
 			(area.left <= mouse.x) &&
@@ -711,37 +668,37 @@ public:
 		}
 		return 0;
 	}
-	//ƒ}ƒEƒX‚ª¶ƒNƒŠƒbƒN‚³‚ê‚½‚©‚Ç‚¤‚©
+	//ãƒã‚¦ã‚¹ãŒå·¦ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã‹ã©ã†ã‹
 	bool get_l_click() {
 		return (l_click == 1 && b_l_click == 0);
 	}
-	//w’èRECT“à‚Åƒ}ƒEƒX‚ªƒNƒŠƒbƒN‚³‚ê‚½‚©‚Ç‚¤‚©
+	//æŒ‡å®šRECTå†…ã§ãƒã‚¦ã‚¹ãŒã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã‹ã©ã†ã‹
 	bool l_click_in(RECT area) {
 		return (in(area) && get_l_click());
 	}
-	//w’èRECT“à‚Åƒ}ƒEƒX‚ª‰Ÿ‚³‚ê‚Ä‚¢‚ê‚Î1
+	//æŒ‡å®šRECTå†…ã§ãƒã‚¦ã‚¹ãŒæŠ¼ã•ã‚Œã¦ã„ã‚Œã°1
 	bool drag_in(RECT area) {
 		return (in(area) && (l_click));
 	}
-	//–ˆƒtƒŒ[ƒ€ŒÄ‚Ño‚µŠÖ”
+	//æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã³å‡ºã—é–¢æ•°
 	void loop() {
 		b_l_click = l_click;
 	}
 };
 
-//GUIƒNƒ‰ƒX
+//GUIã‚¯ãƒ©ã‚¹
 class GUI {
 public:
-	//•Ï”éŒ¾
-	double move; //”Ä—pƒAƒjƒ[ƒVƒ‡ƒ“•Ï”
-	double fps; //ƒtƒŒ[ƒ€ƒŒ[ƒg
+	//å¤‰æ•°å®£è¨€
+	double move; //æ±ç”¨ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¤‰æ•°
+	double fps; //ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆ
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒg
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
 	WIN_EVENT win_event;
 	Frames frames;
 
-	//ŠÖ”éŒ¾
-	//’PˆÊ•ÏŠ·ŠÖ”
+	//é–¢æ•°å®£è¨€
+	//å˜ä½å¤‰æ›é–¢æ•°
 	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
 		float b;
 		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
@@ -750,39 +707,39 @@ public:
 	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
 		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
 	}
-	//”wŒi‰Šú‰»
+	//èƒŒæ™¯åˆæœŸåŒ–
 	void reset() {
 		ofBackground(30, 30, 30);
 	}
-	//ƒtƒŒ[ƒ€ƒŒ[ƒgw’è
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ãƒ¬ãƒ¼ãƒˆæŒ‡å®š
 	void set_fps(double frame_rate) {
 		fps = frame_rate;
 	}
-	//ü‚Ìƒ{ƒbƒNƒX•`‰æŠÖ”
+	//ç·šã®ãƒœãƒƒã‚¯ã‚¹æç”»é–¢æ•°
 	void LineBox(RECT pos, int thick) {
-		ofRect(pos.left, pos.top, pos.right - pos.left, thick); //ã
-		ofRect(pos.right - thick, pos.top + thick, thick, (pos.bottom - pos.top) - 2 * thick); //‰E
-		ofRect(pos.left, pos.bottom - thick, pos.right - pos.left, thick); //‰º
-		ofRect(pos.left, pos.top + thick, thick, (pos.bottom - pos.top) - 2 * thick); //¶
+		ofRect(pos.left, pos.top, pos.right - pos.left, thick); //ä¸Š
+		ofRect(pos.right - thick, pos.top + thick, thick, (pos.bottom - pos.top) - 2 * thick); //å³
+		ofRect(pos.left, pos.bottom - thick, pos.right - pos.left, thick); //ä¸‹
+		ofRect(pos.left, pos.top + thick, thick, (pos.bottom - pos.top) - 2 * thick); //å·¦
 	}
-	//ƒtƒŒ[ƒ€‚Ì‹«ŠEü•`‰æ
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ã®å¢ƒç•Œç·šæç”»
 	void FrameLine(frame *root) {
 		ofSetColor(255, 255, 255, 255);
-		//©ƒtƒŒ[ƒ€•`‰æ
+		//è‡ªãƒ•ãƒ¬ãƒ¼ãƒ æç”»
 		LineBox(root->pos, 1);
-		//©ƒtƒŒ[ƒ€‚ÉqƒtƒŒ[ƒ€‚ª‚ ‚ê‚Î‘S•”•`‰æ
+		//è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã«å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒã‚ã‚Œã°å…¨éƒ¨æç”»
 		if (root->num_child != 0) {
 			for (int i = 0; i < root->num_child; i++) {
 				FrameLine(root->childs[i]);
 			}
 		}
 	}
-	//ƒtƒŒ[ƒ€‚Ì–¼Ì•`‰æ
+	//ãƒ•ãƒ¬ãƒ¼ãƒ ã®åç§°æç”»
 	void FrameName(frame *root) {
 		ofSetColor(255, 255, 255, 255);
-		//©ƒtƒŒ[ƒ€‚ªqƒtƒŒ[ƒ€‚ğ‚Á‚Ä‚½ê‡
+		//è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ãŒå­ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æŒã£ã¦ãŸå ´åˆ
 		if (root->num_child != 0) {
-			//©ƒtƒŒ[ƒ€‚ÉqƒtƒŒ[ƒ€‚ª‚ ‚ê‚Î‘S•”•`‰æ
+			//è‡ªãƒ•ãƒ¬ãƒ¼ãƒ ã«å­ãƒ•ãƒ¬ãƒ¼ãƒ ãŒã‚ã‚Œã°å…¨éƒ¨æç”»
 			if (root->num_child != 0) {
 				for (int i = 0; i < root->num_child; i++) {
 					FrameName(root->childs[i]);
@@ -790,36 +747,36 @@ public:
 			}
 		}
 		else {
-			//qƒtƒŒ[ƒ€‚ğ‚Á‚Ä‚¢‚È‚¢ê‡
+			//å­ãƒ•ãƒ¬ãƒ¼ãƒ ã‚’æŒã£ã¦ã„ãªã„å ´åˆ
 			ofDrawBitmapString(root->name, root->pos.left + 4, root->pos.top + 12);
 		}
 	}
-	//ƒOƒ‰ƒtŠî”ÕUI(ƒtƒŒ[ƒ€,”gŒ`”z—ñ,ƒTƒ“ƒvƒ‹”,•`‰æƒ‚[ƒh)
+	//ã‚°ãƒ©ãƒ•åŸºç›¤UI(ãƒ•ãƒ¬ãƒ¼ãƒ ,æ³¢å½¢é…åˆ—,ã‚µãƒ³ãƒ—ãƒ«æ•°,æç”»ãƒ¢ãƒ¼ãƒ‰)
 	void wave_glaph(frame *f, float *samples, int num_sample, char mode) {
-		//•`‰æŒø—¦‰»‚Ì‚½‚ßAƒsƒNƒZƒ‹‚Ì”‚É‡‚í‚¹‚Ä•`‰æ
-		int index = 0; //”z—ñ‚©‚ç’l‚ğQÆ‚·‚é‚Æ‚«‚ÌƒCƒ“ƒfƒbƒNƒX
+		//æç”»åŠ¹ç‡åŒ–ã®ãŸã‚ã€ãƒ”ã‚¯ã‚»ãƒ«ã®æ•°ã«åˆã‚ã›ã¦æç”»
+		int index = 0; //é…åˆ—ã‹ã‚‰å€¤ã‚’å‚ç…§ã™ã‚‹ã¨ãã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹
 		float percentage = 0.0f;
-		float height; //¡•`‰æ‚·‚é”g‚Ì‚‚³
-		float b_height; //‘OƒtƒŒ[ƒ€‚Ìheight
+		float height; //ä»Šæç”»ã™ã‚‹æ³¢ã®é«˜ã•
+		float b_height; //å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®height
 		for (int i = 0; i < f->size.x; i++) {
-			percentage = percent((float)i, 0.0f, (float)f->size.x, 0.0f, (float)num_sample - 1); //ˆê‘ã“ü
-			index = (int)percentage; //”gŒ`”z—ñ‚ÌƒCƒ“ƒfƒbƒNƒXZo
-			percentage = percentage - (float)index; //int,float‚Ì«¿ã•K‚¸³‚Ì”‚É‚È‚é
-													//(”O‚Ìˆ×)index+1>=num_sample‚É‚È‚Á‚½‚çƒ‹[ƒv’Eo
+			percentage = percent((float)i, 0.0f, (float)f->size.x, 0.0f, (float)num_sample - 1); //ä¸€æ™‚ä»£å…¥
+			index = (int)percentage; //æ³¢å½¢é…åˆ—ã®ã‚¤ãƒ³ãƒ‡ãƒƒã‚¯ã‚¹ç®—å‡º
+			percentage = percentage - (float)index; //int,floatã®æ€§è³ªä¸Šå¿…ãšæ­£ã®æ•°ã«ãªã‚‹
+													//(å¿µã®ç‚º)index+1>=num_sampleã«ãªã£ãŸã‚‰ãƒ«ãƒ¼ãƒ—è„±å‡º
 			if (index + 1 >= num_sample) {
 				break;
 			}
-			//¡•`‰æ‚·‚é”g‚Ì‚‚³
+			//ä»Šæç”»ã™ã‚‹æ³¢ã®é«˜ã•
 			height =
 				percent(samples[index], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (1.0f - percentage) +
 				percent(samples[index + 1], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (percentage);
-			//f->size.x<num_sample‚Ì‚Í“h‚è‚Â‚Ô‚µˆ—“Áê
+			//f->size.x<num_sampleã®æ™‚ã¯å¡—ã‚Šã¤ã¶ã—å‡¦ç†ç‰¹æ®Š
 			if (i % 2 == 0) {
 				ofSetColor(255, 255, 255, 255);
 				switch (mode) {
-				case 0: //“h‚è‚Â‚Ô‚µ‚È‚µ
+				case 0: //å¡—ã‚Šã¤ã¶ã—ãªã—
 					break;
-				case 1: //y=0.0‚ğ’†S‚É“h‚è‚Â‚Ô‚µ
+				case 1: //y=0.0ã‚’ä¸­å¿ƒã«å¡—ã‚Šã¤ã¶ã—
 					ofRect(
 						f->pos.left + i,
 						f->pos.bottom - f->size.y / 2.0f - height,
@@ -827,7 +784,7 @@ public:
 						height
 					);
 					break;
-				case 2: //”gŒ`‚©‚ç‰º‚ğ“h‚è‚Â‚Ô‚µ
+				case 2: //æ³¢å½¢ã‹ã‚‰ä¸‹ã‚’å¡—ã‚Šã¤ã¶ã—
 					ofRect(
 						f->pos.left + i,
 						f->pos.bottom - f->size.y / 2.0f - height,
@@ -835,7 +792,7 @@ public:
 						f->size.y / 2.0f + height
 					);
 					break;
-				case 3: //ãŒÀƒ‰ƒCƒ“•`‰æ
+				case 3: //ä¸Šé™ãƒ©ã‚¤ãƒ³æç”»
 					ofSetColor(255, 0, 0, 255);
 					ofRect(
 						f->pos.left + i,
@@ -861,26 +818,23 @@ public:
 					f->pos.bottom - f->size.y / 2.0f - height
 				);
 			}
-			b_height = height; //‘OƒtƒŒ[ƒ€‚Ì‚Æ‚«‚Ìheightæ“¾—p
+			b_height = height; //å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã®ã¨ãã®heightå–å¾—ç”¨
 		}
 	}
-	//Šg‘åk¬‰Â”\‚ÈƒOƒ‰ƒt•`‰æŠÖ”
+	//æ‹¡å¤§ç¸®å°å¯èƒ½ãªã‚°ãƒ©ãƒ•æç”»é–¢æ•°
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
 		GraphPara *para;
 		if (f->data.size() == 0) {
-			//ƒCƒ“ƒXƒ^ƒ“ƒX‰»
+			//ã‚¤ãƒ³ã‚¹ã‚¿ãƒ³ã‚¹åŒ–
 			f->data.push_back(new frame);
 			f->data.push_back(new GraphPara);
-			//‰Šú‰»
-				//ƒtƒŒ[ƒ€ƒNƒ‰ƒX
+			//åˆæœŸåŒ–
+				//ãƒ•ãƒ¬ãƒ¼ãƒ ã‚¯ãƒ©ã‚¹
 				frames.add(f, (frame*)(f->data[0]), "wave_glaph", f->mode, 0);
 				frames.set_parent(f, f->mode, 4);
 				f->childs[0]->pos = f->pos;
 				f->childs[0]->size = f->size;
 				f->childs[0]->length = f->length;
-				//ƒOƒ‰ƒtƒpƒ‰ƒ[ƒ^ƒNƒ‰ƒX
-				para = (GraphPara*)(f->data[1]);
-				para->create({0.0f,1.0f,0.0f,1.0f});
 		}else{
 			para = (GraphPara*)(f->data[1]);
 		}
@@ -893,37 +847,37 @@ public:
 			//cursor({ f->childs[0]->pos.right,f->childs[0]->pos.top }, 15);
 		}
 	}
-	//ƒpƒ‰ƒ[ƒ^ƒJ[ƒ\ƒ‹•`‰æŠÖ”
+	//ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚«ãƒ¼ã‚½ãƒ«æç”»é–¢æ•°
 	void cursor(POINT pos,int size) {
 		ofSetColor(255, 255, 255, 200);
 		ofRect(pos.x-size/2,pos.y-size/2,size,size);
 	}
-	//ƒXƒCƒbƒ`UI
+	//ã‚¹ã‚¤ãƒƒãƒUI
 	void sw(frame *f, bool *sw) {
-		//ƒAƒjƒ[ƒVƒ‡ƒ“•Ï”Šm”F
+		//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³å¤‰æ•°ç¢ºèª
 		bool sw2[3];
 		bool loop = 1;
 		Animation *animation;
 		FBO *fbo;
 		if (f->data.size() == 0) {
-			//ƒtƒŒ[ƒ€‚ÉƒNƒ‰ƒX’Ç‰Á
+			//ãƒ•ãƒ¬ãƒ¼ãƒ ã«ã‚¯ãƒ©ã‚¹è¿½åŠ 
 			f->data.push_back(new Animation);
 			f->data.push_back(new FBO);
-			//ƒ|ƒCƒ“ƒ^‘ã“ü
+			//ãƒã‚¤ãƒ³ã‚¿ä»£å…¥
 			animation = (Animation*)f->data[0];
 			fbo = (FBO*)f->data[1];
-			//ƒNƒ‰ƒX‰Šú‰»
-			animation->add(0.15, 3, &sw2[0]); //ƒ}ƒEƒX‚ğ‚©‚´‚µ‚½‚Æ‚«1
-			animation->add(0.15, 3, &sw2[1]); //ƒ}ƒEƒX‚ğ‚©‚´‚µ‚½‚Æ‚«2
-			animation->add(0.15, 3, sw); //ƒNƒŠƒbƒN‚³‚ê‚½‚Æ‚«
+			//ã‚¯ãƒ©ã‚¹åˆæœŸåŒ–
+			animation->add(0.15, 3, &sw2[0]); //ãƒã‚¦ã‚¹ã‚’ã‹ã–ã—ãŸã¨ã1
+			animation->add(0.15, 3, &sw2[1]); //ãƒã‚¦ã‚¹ã‚’ã‹ã–ã—ãŸã¨ã2
+			animation->add(0.15, 3, sw); //ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã¨ã
 			animation->add(1.0, 4, &loop);
-			animation->set_fps(fps); //fpsw’è
+			animation->set_fps(fps); //fpsæŒ‡å®š
 			fbo->add(60, 60);
 		}else{
 			animation = (Animation*)f->data[0];
 			fbo = (FBO*)f->data[1];
 		}
-		//ƒtƒŒ[ƒ€ƒoƒbƒtƒ@‚É•`‰æ
+		//ãƒ•ãƒ¬ãƒ¼ãƒ ãƒãƒƒãƒ•ã‚¡ã«æç”»
 		ofSetColor(255, 255, 255, 255);
 		fbo->change_c(0);
 		ofSetColor(255, 255, 255, 255);
@@ -940,8 +894,8 @@ public:
 		ofSetColor(0, 0, 0, 0);
 		ofRect(20, 20, 20, 20);
 		fbo->change_a(-1);
-		//ƒXƒCƒbƒ`ƒCƒxƒ“ƒgŠm”F
-		//ƒNƒŠƒbƒN‚³‚ê‚½‚Æ‚«
+		//ã‚¹ã‚¤ãƒƒãƒã‚¤ãƒ™ãƒ³ãƒˆç¢ºèª
+		//ã‚¯ãƒªãƒƒã‚¯ã•ã‚ŒãŸã¨ã
 		if (win_event.l_click_in({
 			f->pos.left + 10,
 			f->pos.top + 20,
@@ -950,7 +904,7 @@ public:
 		})) {
 			*sw = !(*sw);
 		}
-		//ƒ}ƒEƒX‚ğ‚©‚´‚µ‚½‚Æ‚«
+		//ãƒã‚¦ã‚¹ã‚’ã‹ã–ã—ãŸã¨ã
 		sw2[0] = win_event.in({
 			f->pos.left + 10,
 			f->pos.top + 20,
@@ -958,9 +912,9 @@ public:
 			f->pos.top + 80
 		});
 		sw2[1] = (animation->p[0] >= 0.5);
-		//ƒAƒjƒ[ƒVƒ‡ƒ“Šm”F
+		//ã‚¢ãƒ‹ãƒ¡ãƒ¼ã‚·ãƒ§ãƒ³ç¢ºèª
 		animation->loop();
-		//•`‰æ
+		//æç”»
 		fbo->draw_c(f->pos.left + 10, f->pos.top + 20, 0);
 		ofEnableBlendMode(OF_BLENDMODE_ALPHA);
 		ofSetColor(0, 128, 198, 255);
@@ -990,36 +944,36 @@ public:
 			(int)move * 2
 		);
 	}
-	//–ˆƒtƒŒ[ƒ€ŒÄ‚Ño‚µŠÖ”
+	//æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã³å‡ºã—é–¢æ•°
 	void loop() {
 		win_event.loop();
 	}
 	/*
-	’Ç‰Á—\’è‚ÌŠÖ”
-	ƒXƒCƒbƒ`ŠÖ”
-	ƒXƒ‰ƒCƒh‰Â•Ï’ïRŠÖ”
-	ŠeƒOƒ‰ƒtƒpƒ‰ƒ[ƒ^[ŠÖ”
-	ttf,otf‚Ì©‘Ì‚Å•¶š—ñ•`‰æŠÖ”
+	è¿½åŠ äºˆå®šã®é–¢æ•°
+	ã‚¹ã‚¤ãƒƒãƒé–¢æ•°
+	ã‚¹ãƒ©ã‚¤ãƒ‰å¯å¤‰æŠµæŠ—é–¢æ•°
+	å„ã‚°ãƒ©ãƒ•ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼é–¢æ•°
+	ttf,otfã®è‡ªä½“ã§æ–‡å­—åˆ—æç”»é–¢æ•°
 	*/
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒg
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
 
 };
 
-//•`‰æƒNƒ‰ƒX
+//æç”»ã‚¯ãƒ©ã‚¹
 class Draw {
 public:
-	//•Ï”éŒ¾
+	//å¤‰æ•°å®£è¨€
 	float fps;
 	RECT win_size;
-	bool a; //ƒfƒoƒbƒO—p
+	bool a; //ãƒ‡ãƒãƒƒã‚°ç”¨
 
-			//ƒRƒ“ƒXƒgƒ‰ƒNƒg
+			//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
 	Parameteres para;
 	GUI gui;
 
-	//ŠÖ”éŒ¾
-	bool resize(WINDOW_INFO win_info) { //•`‰æ—Ìˆæ•ÏX
-										//win_info‚ÌƒEƒBƒ“ƒhƒEƒTƒCƒYXV
+	//é–¢æ•°å®£è¨€
+	bool resize(WINDOW_INFO win_info) { //æç”»é ˜åŸŸå¤‰æ›´
+										//win_infoã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºæ›´æ–°
 		GetClientRect(win_info.hwnd, &win_info.window);
 		win_info.size.x = win_info.window.right - win_info.window.left;
 		win_info.size.y = win_info.window.bottom - win_info.window.top;
@@ -1028,75 +982,75 @@ public:
 		para.p_frame.root.pos.right = win_info.size.x;
 		para.p_frame.root.pos.bottom = win_info.size.y;
 		fps = win_info.fps;
-		para.frames.resize(&para.p_frame.root, para.p_frame.root.pos); //‘SƒtƒŒ[ƒ€‚Ì©“®”z’u
+		para.frames.resize(&para.p_frame.root, para.p_frame.root.pos); //å…¨ãƒ•ãƒ¬ãƒ¼ãƒ ã®è‡ªå‹•é…ç½®
 		para.p_frame.all.pos.bottom = para.p_frame.all.length;
 		para.frames.resize(&para.p_frame.all, para.p_frame.all.pos);
 		gui.set_fps(fps);
 		return 0;
 	}
-	void loop() { //ƒ‹[ƒv’†‚ÉŒÄ‚Ño‚·ŠÖ”
-				  //‰æ–Ê‰Šú‰»
+	void loop() { //ãƒ«ãƒ¼ãƒ—ä¸­ã«å‘¼ã³å‡ºã™é–¢æ•°
+				  //ç”»é¢åˆæœŸåŒ–
 		gui.reset();
-		//ƒtƒŒ[ƒ€‚Ì‹«ŠEü•`‰æ
+		//ãƒ•ãƒ¬ãƒ¼ãƒ ã®å¢ƒç•Œç·šæç”»
 		gui.FrameLine(&para.p_frame.root);
-		//ƒtƒŒ[ƒ€‚Ì–¼Ì•`‰æ
+		//ãƒ•ãƒ¬ãƒ¼ãƒ ã®åç§°æç”»
 		gui.FrameName(&para.p_frame.root);
-		//Šeƒpƒ‰ƒ[ƒ^[•`‰æ
+		//å„ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ãƒ¼æç”»
 		{
 			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 		}
-		//–ˆƒtƒŒ[ƒ€ŒÄ‚Ño‚µŠÖ”
+		//æ¯ãƒ•ãƒ¬ãƒ¼ãƒ å‘¼ã³å‡ºã—é–¢æ•°
 		gui.loop();
 	}
 };
 
-//‘S‚Ä‚Ìˆ—‚ğs‚¤ƒNƒ‰ƒX
+//å…¨ã¦ã®å‡¦ç†ã‚’è¡Œã†ã‚¯ãƒ©ã‚¹
 class AllProcess {
 public:
-	//•Ï”‰Šú‰»
-	WINDOW_INFO win_info; //ƒEƒBƒ“ƒhƒEî•ñ•Û•Ï”‰Šú‰»
+	//å¤‰æ•°åˆæœŸåŒ–
+	WINDOW_INFO win_info; //ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æƒ…å ±ä¿æŒå¤‰æ•°åˆæœŸåŒ–
 
-						  //ƒRƒ“ƒXƒgƒ‰ƒNƒg
-	ShareMem sm; //‹¤—Lƒƒ‚ƒŠƒNƒ‰ƒX
-	Draw draw; //•`‰æƒNƒ‰ƒX
-	std::string title; //ƒEƒBƒ“ƒhƒEƒ^ƒCƒgƒ‹•¶š—ñ
+						  //ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
+	ShareMem sm; //å…±æœ‰ãƒ¡ãƒ¢ãƒªã‚¯ãƒ©ã‚¹
+	Draw draw; //æç”»ã‚¯ãƒ©ã‚¹
+	std::string title; //ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚¿ã‚¤ãƒˆãƒ«æ–‡å­—åˆ—
 
-			   //ŠÖ”éŒ¾
-	bool init(LPSTR cmd, WINDOW_INFO win_info2) { //‰Šú‰»ÀsŠÖ”
-												  //•Ï”‘ã“ü
+			   //é–¢æ•°å®£è¨€
+	bool init(LPSTR cmd, WINDOW_INFO win_info2) { //åˆæœŸåŒ–æ™‚å®Ÿè¡Œé–¢æ•°
+												  //å¤‰æ•°ä»£å…¥
 		win_info = win_info2;
-		//‹¤—Lƒƒ‚ƒŠŠÖ˜A
+		//å…±æœ‰ãƒ¡ãƒ¢ãƒªé–¢é€£
 		if (sm.Open(cmd)) {
 			return 1;
 		}
-		if (sm.smd->Ready != nullptr) { //‘½d‹N“®–h~
+		if (sm.smd->Ready != nullptr) { //å¤šé‡èµ·å‹•é˜²æ­¢
 			return 1;
 		}
 		else {
 			sm.smd->Ready = win_info.hwnd;
 		}
-		//DrawŠÖ˜A
-		if (draw.resize(win_info)) { //g—p’†‚ÌƒEƒBƒ“ƒhƒEƒTƒCƒYXV
+		//Drawé–¢é€£
+		if (draw.resize(win_info)) { //ä½¿ç”¨ä¸­ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºæ›´æ–°
 			return 1;
 		}
-		//‚»‚Ì‘¼
-		//‹¤—Lƒƒ‚ƒŠƒf[ƒ^‚ğƒpƒ‰ƒ[ƒ^ƒNƒ‰ƒX‚Ì•Ï”‚Æ“¯Šú
+		//ãã®ä»–
+		//å…±æœ‰ãƒ¡ãƒ¢ãƒªãƒ‡ãƒ¼ã‚¿ã‚’ãƒ‘ãƒ©ãƒ¡ãƒ¼ã‚¿ã‚¯ãƒ©ã‚¹ã®å¤‰æ•°ã¨åŒæœŸ
 		draw.para.p_value = &sm.smd->para;
 		return 0;
 	}
-	bool loop() { //ƒ‹[ƒv’†‚ÉŒÄ‚Ño‚·ŠÖ”
-				  //DrawŠÖ˜A
-				  //‘OƒtƒŒ[ƒ€‚ÆƒEƒBƒ“ƒhƒEƒTƒCƒY”äŠr
+	bool loop() { //ãƒ«ãƒ¼ãƒ—ä¸­ã«å‘¼ã³å‡ºã™é–¢æ•°
+				  //Drawé–¢é€£
+				  //å‰ãƒ•ãƒ¬ãƒ¼ãƒ ã¨ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºæ¯”è¼ƒ
 		if (
 			(win_info.size.x != win_info.b_size.x) ||
 			(win_info.size.y != win_info.b_size.y)
 			) {
-			if (draw.resize(win_info)) { //g—p’†‚ÌƒEƒBƒ“ƒhƒEƒTƒCƒYXV
+			if (draw.resize(win_info)) { //ä½¿ç”¨ä¸­ã®ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦ã‚µã‚¤ã‚ºæ›´æ–°
 				return 1;
 			}
 		}
-		//GUI•`‰æ
+		//GUIæç”»
 		draw.loop();
 		///debug///
 		title = "";
@@ -1106,7 +1060,7 @@ public:
 		///debug///
 		return 0;
 	}
-	//I—¹ˆ—
+	//çµ‚äº†æ™‚å‡¦ç†
 	~AllProcess() {
 		if (sm.smd != nullptr) {
 			sm.smd->Ready = nullptr;
@@ -1117,8 +1071,8 @@ public:
 class ofApp : public ofBaseApp {
 
 public:
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒ^
-	ofApp(int argc, LPSTR arg[]); //ƒRƒ“ƒ\[ƒ‹ˆø”æ“¾
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ã‚¿
+	ofApp(int argc, LPSTR arg[]); //ã‚³ãƒ³ã‚½ãƒ¼ãƒ«å¼•æ•°å–å¾—
 
 	void setup();
 	void update();
@@ -1136,15 +1090,15 @@ public:
 	void dragEvent(ofDragInfo dragInfo);
 	void gotMessage(ofMessage msg);
 
-	//FBOƒRƒ“ƒXƒgƒ‰ƒNƒg
+	//FBOã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
 	ofFbo fbo;
 
-	//ƒEƒBƒ“ƒhƒEî•ñ•Û•Ï”‰Šú‰»
+	//ã‚¦ã‚£ãƒ³ãƒ‰ã‚¦æƒ…å ±ä¿æŒå¤‰æ•°åˆæœŸåŒ–
 	WINDOW_INFO win_info;
 
-	//ƒRƒ“ƒXƒgƒ‰ƒNƒg
+	//ã‚³ãƒ³ã‚¹ãƒˆãƒ©ã‚¯ãƒˆ
 	AllProcess app;
 
-	//Àsˆø”•¶š—ñ
+	//å®Ÿè¡Œæ™‚å¼•æ•°æ–‡å­—åˆ—
 	LPSTR lpCmdLine;
 };
