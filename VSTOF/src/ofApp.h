@@ -339,40 +339,40 @@ public:
 	int get_imax() {
 		return max;
 	}
-	//フレーム座標変換関数(x座標:dim1,y座標:dim2)
-	POINT get_pos(int dim1, int dim2, int index) {
+	//フレーム座標変換関数
+	POINT get_pos(int index) {
 		POINT pos;
 		pos.x = (int)(percent(
-			para[dim1][index],
-			para[dim1][min],
-			para[dim1][max],
+			para[0][index],
+			para[0][min],
+			para[0][max],
 			(float)f->pos.left,
 			(float)f->pos.right
 		));
 		pos.y = (int)(percent(
-			para[dim2][index],
-			para[dim2][min],
-			para[dim2][max],
+			para[1][index],
+			para[1][min],
+			para[1][max],
 			(float)f->pos.bottom,
 			(float)f->pos.top
 		));
 		return pos;
 	}
-	//パラメータ座標変換関数(x座標:dim1,y座標:dim2)
-	void set_pos(POINT pos ,int dim1, int dim2, int index) {
-		para[dim1][index] = percent(
+	//パラメータ座標変換関数
+	void set_pos(POINT pos ,int index) {
+		para[0][index] = percent(
 			(float)pos.x,
 			(float)f->pos.left,
 			(float)f->pos.right,
-			para[dim1][min],
-			para[dim1][max]
+			para[0][min],
+			para[0][max]
 		);
-		para[dim2][index] = percent(
+		para[1][index] = percent(
 			(float)pos.y,
 			(float)f->pos.bottom,
 			(float)f->pos.top,
-			para[dim2][min],
-			para[dim2][max]
+			para[1][min],
+			para[1][max]
 		);
 	}
 	//現在アクティブなパラメータのインデックス設定(ない場合はindex=-1)
@@ -387,41 +387,63 @@ public:
 	int get_active() {
 		return active;
 	}
+	//指定範囲内に指定地が存在するかどうかを判定する関数
+	bool in(RECT area, POINT pos) {
+		if (
+			(area.left <= pos.x) &&
+			(area.top <= pos.y) &&
+			(area.right >= pos.x) &&
+			(area.bottom >= pos.y)
+			) {
+			return 1;
+		}
+		return 0;
+	}
+	bool in(POINT center, int size, POINT pos) {
+		return in({
+			center.x - size / 2,
+			center.y - size / 2,
+			center.x + size / 2,
+			center.y + size / 2
+		}, pos);
+	}
+	//ドラッグ時マウス追従関数
+	void seek(int index, POINT mouse, bool l_click, int size) {
+		if (in(get_pos(index), size, mouse) && l_click) {
+			set_active(index);
+		}
+		if ((get_active() == index) && (!l_click)) {
+			set_active(-1);
+		}
+		if (get_active() == index) {
+			set_pos(mouse, index);
+			change(index);
+		}
+	}
 	//パラメータ変更時関数関数
-	void change() {
+	void change(int index) {
 		for (int i = 0; i < para.size(); i++) {
-			if ((i == min) || (i == max)) {
-				//最小値パラメータの上限判定
-				if (
-					(para[i][min] < lim_min[i])&&
-					((lim_mode[i] == 1) || (lim_mode[i] == 3))
-					) {
-					para[i][min] = lim_min[i];
+			//下限判定
+			if (
+				(para[i][index] < lim_min[i]) &&
+				((lim_mode[i] == 1) || (lim_mode[i] == 3))
+				) {
+				para[i][index] = lim_min[i];
+			}
+			//上限判定
+			if (
+				para[i][index] > lim_max[i] &&
+				((lim_mode[i] == 2) || (lim_mode[i] == 3))
+				) {
+				para[i][index] = lim_max[i];
+			}
+			//最小値<最大値の判定
+			if (para[i][min] > para[i][min]) {
+				if (active = min) {
+					para[i][min] = para[i][max];
 				}
-				//最大値パラメータの上限判定
-				if (
-					para[i][max] > lim_max[i] &&
-					((lim_mode[i] == 2) || (lim_mode[i] == 3))
-					) {
-					para[i][max] = lim_max[i];
-				}
-				//最小値<最大値の判定
-				if (para[i][min] > para[i][min]) {
-					if (active = min) {
-						para[i][min] = para[i][max];
-					}
-					else {
-						para[i][max] = para[i][min];
-					}
-				}
-			}else{
-				for (int j = 0; j < para[i].size(); j++) {
-					if (para[i][j] < para[i][min]) {
-						para[i][j] = para[i][min];
-					}
-					if (para[i][j] > para[i][max]) {
-						para[i][j] = para[i][max];
-					}
+				else {
+					para[i][max] = para[i][min];
 				}
 			}
 		}
@@ -984,8 +1006,6 @@ public:
 		}else{
 			para = (GraphPara*)(f->data[1]);
 		}
-		//パラメータクラスの更新
-		//para->change();
 		//グラフの描画
 		wave_glaph(f->childs[0], samples, num_sample, mode);
 		//パラメータ操作カーソル描画
@@ -996,20 +1016,9 @@ public:
 	//パラメータカーソル描画関数
 	void cursor(GraphPara *para, int index, int size) {
 		POINT pos;
-		pos = para->get_pos(0, 1, index);
-		if (win_event.in(pos, size) && win_event.l_click) {
-			para->set_active(index);
-		}
-		if ((para->get_active() == index)&&(!win_event.l_click)) {
-			para->set_active(-1);
-		}
+		para->seek(index, win_event.mouse, win_event.l_click, size);
+		pos = para->get_pos(index);
 		ofSetColor(255, 255, 255, 200);
-		if (para->get_active() == index) {
-			pos.x = win_event.mouse.x;
-			pos.y = win_event.mouse.y;
-			para->set_pos(pos, 0, 1, index);
-			ofRect(win_event.mouse.x - size / 2, win_event.mouse.y - size / 2, size, size);
-		}
 		ofRect(pos.x - size / 2, pos.y - size / 2, size, size);
 	}
 	//スイッチUI
