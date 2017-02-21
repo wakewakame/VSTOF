@@ -253,11 +253,18 @@ private:
 	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
 	std::vector<float> lim_min; //lim_min[次元]
 	std::vector<float> lim_max; //lim_max[次元]
+	std::vector<char> lim_mode; //lim_min,lim_max変数の有効無効(0=なし,1=下限あり,2=上限あり,3=上限下限あり)
 	int min; //min
 	int max; //max
 	int active; //active[次元] 現在アクティブなパラメータのインデックス
 	frame *f;
 public:
+	//コンストラクト
+	GraphPara() {
+		min = -1;
+		max = -1;
+		active = -1;
+	}
 	//単位変換関数
 	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
 		float b;
@@ -271,7 +278,7 @@ public:
 	void set_frame(frame *set_f) {
 		f = set_f;
 	}
-	//新規パラメータ追加関数
+	//新規パラメータ追加関数(最小値と最大値のパラメータは必ず生成)
 	void create(char mode, int argnum, ...) {
 		va_list arg; //引数リスト
 		//次元数が足りなければ追加
@@ -280,6 +287,7 @@ public:
 			para.push_back(empty);
 			lim_min.push_back(-1.0f);
 			lim_max.push_back(1.0f);
+			lim_mode.push_back(0);
 		}
 		va_start(arg, argnum);
 			for (int i = 0; i < argnum; i++) {
@@ -299,10 +307,29 @@ public:
 	float get_para(int dim, int index) {
 		return para[dim][index];
 	}
-	//最小値と最大値のパラメータの上限設定
-	void limit(float min, float max, int dim) {
+	//最小値のパラメータの上限設定(必要があれば)
+	void limit_min(float min, int dim) {
 		lim_min[dim] = min;
+		switch (lim_mode[dim]) {
+		case 0:
+			lim_mode[dim] = 1;
+			break;
+		case 2:
+			lim_mode[dim] = 3;
+			break;
+		}
+	}
+	//最大値のパラメータの上限設定(必要があれば)
+	void limit_max(float max, int dim) {
 		lim_max[dim] = max;
+		switch (lim_mode[dim]) {
+		case 0:
+			lim_mode[dim] = 2;
+			break;
+		case 1:
+			lim_mode[dim] = 3;
+			break;
+		}
 	}
 	//最小値インデックス取得関数
 	int get_imin() {
@@ -365,11 +392,17 @@ public:
 		for (int i = 0; i < para.size(); i++) {
 			if ((i == min) || (i == max)) {
 				//最小値パラメータの上限判定
-				if (para[i][min] < lim_min[i]) {
+				if (
+					(para[i][min] < lim_min[i])&&
+					((lim_mode[i] == 1) || (lim_mode[i] == 3))
+					) {
 					para[i][min] = lim_min[i];
 				}
 				//最大値パラメータの上限判定
-				if (para[i][max] > lim_max[i]) {
+				if (
+					para[i][max] > lim_max[i] &&
+					((lim_mode[i] == 2) || (lim_mode[i] == 3))
+					) {
 					para[i][max] = lim_max[i];
 				}
 				//最小値<最大値の判定
@@ -749,6 +782,11 @@ public:
 	bool b_l_click; //前フレームのl_click変数の内容
 
 	//関数宣言
+	//コンストラクト
+	WIN_EVENT() {
+		l_click = 0;
+		b_l_click = 0;
+	}
 	//指定RECT内に存在するかどうか
 	bool in(RECT area) {
 		if (
@@ -937,19 +975,23 @@ public:
 				para->set_frame(f->childs[0]); //フレームのポインタ代入
 				para->create(1, 2, 0.0f, -1.0f); //最小値パラメータ生成
 				para->create(2, 2, (float)num_sample, 1.0f); //最大値パラメータ生成
-				para->limit(0.0f, (float)num_sample, 0); //x軸の最大可動範囲設定
-				para->limit(-1.0f, 1.0f, 1); //y軸の最大可動範囲設定
+				para->create(0, 2, 30.0f, 0.0f); //テストパラメータ生成
+				para->limit_min(0.0f, 0); //x軸の最大可動範囲設定
+				para->limit_max((float)num_sample, 0); //x軸の最大可動範囲設定
+				para->limit_min(-1.0f, 1); //y軸の最大可動範囲設定
+				para->limit_max(1.0f, 1); //y軸の最大可動範囲設定
 				frames.resize(frames.get_root(f), frames.get_root(f)->pos); //リサイズ
 		}else{
 			para = (GraphPara*)(f->data[1]);
 		}
 		//パラメータクラスの更新
-		para->change();
+		//para->change();
 		//グラフの描画
 		wave_glaph(f->childs[0], samples, num_sample, mode);
 		//パラメータ操作カーソル描画
 		cursor(para, para->get_imin(), 15); //グラフの最小値のパラメータ描画
 		cursor(para, para->get_imax(), 15); //グラフの最大値のパラメータ描画
+		cursor(para, 2, 15); //グラフの最大値のパラメータ描画
 	}
 	//パラメータカーソル描画関数
 	void cursor(GraphPara *para, int index, int size) {
@@ -957,11 +999,17 @@ public:
 		pos = para->get_pos(0, 1, index);
 		if (win_event.in(pos, size) && win_event.l_click) {
 			para->set_active(index);
+		}
+		if ((para->get_active() == index)&&(!win_event.l_click)) {
+			para->set_active(-1);
+		}
+		ofSetColor(255, 255, 255, 200);
+		if (para->get_active() == index) {
 			pos.x = win_event.mouse.x;
 			pos.y = win_event.mouse.y;
 			para->set_pos(pos, 0, 1, index);
+			ofRect(win_event.mouse.x - size / 2, win_event.mouse.y - size / 2, size, size);
 		}
-		ofSetColor(255, 255, 255, 200);
 		ofRect(pos.x - size / 2, pos.y - size / 2, size, size);
 	}
 	//スイッチUI
