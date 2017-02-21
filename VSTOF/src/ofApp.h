@@ -257,6 +257,7 @@ private:
 	int min; //min
 	int max; //max
 	int active; //active[次元] 現在アクティブなパラメータのインデックス
+	POINT mouse;
 	frame *f;
 public:
 	//コンストラクト
@@ -342,20 +343,24 @@ public:
 	//フレーム座標変換関数
 	POINT get_pos(int index) {
 		POINT pos;
-		pos.x = (int)(percent(
-			para[0][index],
-			para[0][min],
-			para[0][max],
-			(float)f->pos.left,
-			(float)f->pos.right
-		));
-		pos.y = (int)(percent(
-			para[1][index],
-			para[1][min],
-			para[1][max],
-			(float)f->pos.bottom,
-			(float)f->pos.top
-		));
+		if (get_active() == index) {
+			pos = mouse;
+		}else{
+			pos.x = (int)(percent(
+				para[0][index],
+				para[0][min],
+				para[0][max],
+				(float)f->pos.left,
+				(float)f->pos.right
+			));
+			pos.y = (int)(percent(
+				para[1][index],
+				para[1][min],
+				para[1][max],
+				(float)f->pos.bottom,
+				(float)f->pos.top
+			));
+		}
 		return pos;
 	}
 	//パラメータ座標変換関数
@@ -408,20 +413,21 @@ public:
 		}, pos);
 	}
 	//ドラッグ時マウス追従関数
-	void seek(int index, POINT mouse, bool l_click, int size) {
-		if (in(get_pos(index), size, mouse) && l_click) {
+	void seek(int index, POINT n_mouse, bool l_click, int size) {
+		mouse = n_mouse;
+		if (in(get_pos(index), size, n_mouse) && l_click) {
 			set_active(index);
 		}
 		if ((get_active() == index) && (!l_click)) {
 			set_active(-1);
 		}
 		if (get_active() == index) {
-			set_pos(mouse, index);
-			change(index);
+			set_pos(n_mouse, index);
+			limiter(index); //上限下限制御関数
 		}
 	}
 	//パラメータ変更時関数関数
-	void change(int index) {
+	void limiter(int index) {
 		for (int i = 0; i < para.size(); i++) {
 			//下限判定
 			if (
@@ -1006,6 +1012,8 @@ public:
 		}else{
 			para = (GraphPara*)(f->data[1]);
 		}
+		//グラフのリサイズ
+		
 		//グラフの描画
 		wave_glaph(f->childs[0], samples, num_sample, mode);
 		//パラメータ操作カーソル描画
