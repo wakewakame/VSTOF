@@ -248,22 +248,33 @@ struct frame {
 	*/
 };
 //グラフパラメータ保持
+/*
+使い方
+パラメータを必要な分だけcreate関数で生成
+次元は自動で確保してくれる
+パラメータの可動域は必要があれば設定
+ウィンドウのx,y座標に対応する次元の設定
+*/
+struct Dimension {
+	bool on_limit_min; //パラメータの可動域の最小値が有効かどうか
+	bool on_limit_max; //パラメータの可動域の最大値が有効かどうか
+	float limit_min; //パラメータの可動域の最小値
+	float limit_max; //パラメータの可動域の最大値
+	int min_index; //グラフの描画域の最小値パラメータのインデックス
+	int max_index; //グラフの描画域の最大値パラメータのインデックス
+	std::vector<float> val; //パラメータの値の配列
+};
 class GraphPara {
 private:
-	std::vector<std::vector<float>> para; //para[次元][インデックス] (1次元ならdim=0)
-	std::vector<float> lim_min; //lim_min[次元]
-	std::vector<float> lim_max; //lim_max[次元]
-	std::vector<char> lim_mode; //lim_min,lim_max変数の有効無効(0=なし,1=下限あり,2=上限あり,3=上限下限あり)
-	int min; //min
-	int max; //max
-	int active; //active[次元] 現在アクティブなパラメータのインデックス
-	POINT mouse;
-	frame *f;
+	std::vector<Dimension> param; //各次元のパラメータ配列
+	int active; //現在アクティブなパラメータのインデックス
+	POINT mouse; //現在のマウス座標
+	frame *f; //使用するフレームのポインタ
+	int x_dim; //ウィンドウx座標に対応する次元番号
+	int y_dim; //ウィンドウy座標に対応する次元番号
 public:
 	//コンストラクト
 	GraphPara() {
-		min = -1;
-		max = -1;
 		active = -1;
 	}
 	//単位変換関数
@@ -280,91 +291,114 @@ public:
 		f = set_f;
 	}
 	//新規パラメータ追加関数(最小値と最大値のパラメータは必ず生成)
-	void create(char mode, int argnum, ...) {
+	void create(int argnum, ...) {
 		va_list arg; //引数リスト
 		//次元数が足りなければ追加
-		while (para.size() < argnum) {
-			std::vector<float> empty;
-			para.push_back(empty);
-			lim_min.push_back(-1.0f);
-			lim_max.push_back(1.0f);
-			lim_mode.push_back(0);
+		while (param.size() < argnum) {
+			Dimension empty;
+			param.push_back(empty);
+			int dim = param.size() - 1;
+			param[dim].on_limit_min = 0;
+			param[dim].on_limit_max = 0;
+			param[dim].limit_min = -1.0f;
+			param[dim].limit_max = 1.0f;
+			param[dim].min_index = -1;
+			param[dim].max_index = -1;
 		}
 		va_start(arg, argnum);
-			for (int i = 0; i < argnum; i++) {
-				para[i].push_back((float)va_arg(arg, double));
+			for (int i = 0; i < param.size(); i++) {
+				param[i].val.push_back((float)va_arg(arg, double));
 			}
 		va_end(arg);
-		switch (mode) {
-		case 1:
-			min = para[0].size() - 1;
-			break;
-		case 2:
-			max = para[0].size() - 1;
-			break;
-		}
+	}
+	//グラフの描画域の最小値パラメータのインデックス設定
+	void set_min(int dim, int index) {
+		param[dim].min_index = index;
+	}
+	//グラフの描画域の最大値パラメータのインデックス
+	void set_max(int dim, int index) {
+		param[dim].max_index = index;
 	}
 	//パラメータ取得関数
-	float get_para(int dim, int index) {
-		return para[dim][index];
+	const float get_param(int dim, int index) {
+		return param[dim].val[index];
 	}
-	//最小値のパラメータの上限設定(必要があれば)
+	//パラメータの可動域の最小値設定
 	void limit_min(float min, int dim) {
-		lim_min[dim] = min;
-		switch (lim_mode[dim]) {
-		case 0:
-			lim_mode[dim] = 1;
-			break;
-		case 2:
-			lim_mode[dim] = 3;
-			break;
-		}
+		param[dim].on_limit_min = 1;
+		param[dim].limit_max = min;
 	}
-	//最大値のパラメータの上限設定(必要があれば)
+	//パラメータの可動域の最大値設定
 	void limit_max(float max, int dim) {
-		lim_max[dim] = max;
-		switch (lim_mode[dim]) {
-		case 0:
-			lim_mode[dim] = 2;
-			break;
-		case 1:
-			lim_mode[dim] = 3;
-			break;
-		}
+		param[dim].on_limit_max = 1;
+		param[dim].limit_max = max;
 	}
-	//limit_min取得
-	float get_lim_min(int dim) {
-		return lim_min[dim];
+	//パラメータの可動域の最小値取得
+	const float get_lim_min(int dim) {
+		return param[dim].limit_min;
 	}
-	//limit_max取得
-	float get_lim_max(int dim) {
-		return lim_max[dim];
+	//パラメータの可動域の最大値取得
+	const float get_lim_max(int dim) {
+		return param[dim].limit_max;
+	}
+	//最小値パラメータ取得関数
+	const float get_min(int dim) {
+		return param[dim].val[param[dim].min_index];
+	}
+	//最大値パラメータ取得関数
+	const float get_max(int dim) {
+		return param[dim].val[param[dim].max_index];
 	}
 	//最小値インデックス取得関数
-	int get_imin() {
-		return min;
+	const int get_imin(int dim) {
+		return param[dim].min_index;
 	}
 	//最大値インデックス取得関数
-	int get_imax() {
-		return max;
+	const int get_imax(int dim) {
+		return param[dim].max_index;
+	}
+	//現在アクティブなパラメータのインデックス設定(ない場合はindex=-1)
+	void set_active(int index) {
+		if (index != -1) {
+			active = index;
+		}else {
+			active = -1;
+		}
+	}
+	//現在アクティブなパラメータのインデックス取得
+	const int get_active() {
+		return active;
+	}
+	//ウィンドウのx,y座標に対応する次元数の設定
+	void set_window_dim(int set_x_dim, int set_y_dim) {
+		x_dim = set_x_dim;
+		y_dim = set_y_dim;
+	}
+	//ウィンドウのx座標に対応する次元数の取得
+	const int get_x_dim() {
+		return x_dim;
+	}
+	//ウィンドウのy座標に対応する次元数の取得
+	const int get_y_dim() {
+		return y_dim;
 	}
 	//フレーム座標変換関数
-	POINT get_pos(int index) {
+	const POINT get_pos(int index) {
 		POINT pos;
 		if (get_active() == index) {
 			pos = mouse;
 		}else{
 			pos.x = (int)(percent(
-				para[0][index],
-				para[0][min],
-				para[0][max],
+				param[x_dim].val[index],
+				get_min(x_dim),
+				get_max(x_dim),
 				(float)f->pos.left,
 				(float)f->pos.right
 			));
 			pos.y = (int)(percent(
-				para[1][index],
-				para[1][min],
-				para[1][max],
+				param[y_dim].val[index],
+				get_min(y_dim),
+				get_max(y_dim),
 				(float)f->pos.bottom,
 				(float)f->pos.top
 			));
@@ -373,35 +407,23 @@ public:
 	}
 	//パラメータ座標変換関数
 	void set_pos(POINT pos ,int index) {
-		para[0][index] = percent(
+		param[x_dim].val[index] = percent(
 			(float)pos.x,
 			(float)f->pos.left,
 			(float)f->pos.right,
-			para[0][min],
-			para[0][max]
+			get_min(x_dim),
+			get_max(x_dim)
 		);
-		para[1][index] = percent(
+		param[y_dim].val[index] = percent(
 			(float)pos.y,
 			(float)f->pos.bottom,
 			(float)f->pos.top,
-			para[1][min],
-			para[1][max]
+			get_min(y_dim),
+			get_max(y_dim)
 		);
 	}
-	//現在アクティブなパラメータのインデックス設定(ない場合はindex=-1)
-	void set_active(int index) {
-		if (index != -1) {
-			active = index;
-		}else{
-			active = -1;
-		}
-	}
-	//現在アクティブなパラメータのインデックス取得
-	int get_active() {
-		return active;
-	}
 	//指定範囲内に指定地が存在するかどうかを判定する関数
-	bool in(RECT area, POINT pos) {
+	const bool hit(RECT area, POINT pos) {
 		if (
 			(area.left <= pos.x) &&
 			(area.top <= pos.y) &&
@@ -412,8 +434,8 @@ public:
 		}
 		return 0;
 	}
-	bool in(POINT center, int size, POINT pos) {
-		return in({
+	const bool hit(POINT center, int size, POINT pos) {
+		return hit({
 			center.x - size / 2,
 			center.y - size / 2,
 			center.x + size / 2,
@@ -423,7 +445,7 @@ public:
 	//ドラッグ時マウス追従関数
 	void seek(int index, POINT n_mouse, bool l_click, int size) {
 		mouse = n_mouse;
-		if (in(get_pos(index), size, n_mouse) && l_click) {
+		if (hit(get_pos(index), size, n_mouse) && l_click) {
 			set_active(index);
 		}
 		if ((get_active() == index) && (!l_click)) {
@@ -436,28 +458,27 @@ public:
 	}
 	//パラメータ変更時関数関数
 	void limiter(int index) {
-		for (int i = 0; i < para.size(); i++) {
+		for (int i = 0; i < param.size(); i++) {
 			//下限判定
 			if (
-				(para[i][index] < lim_min[i]) &&
-				((lim_mode[i] == 1) || (lim_mode[i] == 3))
+				(param[i].val[index] < get_lim_min(i)) &&
+				param[i].on_limit_min
 				) {
-				para[i][index] = lim_min[i];
+				param[i].val[index] = get_lim_min(i);
 			}
 			//上限判定
 			if (
-				para[i][index] > lim_max[i] &&
-				((lim_mode[i] == 2) || (lim_mode[i] == 3))
+				(param[i].val[index] > get_lim_max(i)) &&
+				param[i].on_limit_max
 				) {
-				para[i][index] = lim_max[i];
+				param[i].val[index] = get_lim_max(i);
 			}
 			//最小値<最大値の判定
-			if (para[i][min] > para[i][min]) {
-				if (active = min) {
-					para[i][min] = para[i][max];
-				}
-				else {
-					para[i][max] = para[i][min];
+			if (get_min(i) > get_max(i)) {
+				if (active = get_imin(i)) {
+					param[i].val[get_imin(i)] = get_max(i);
+				}else {
+					param[i].val[get_imax(i)] = get_min(i);
 				}
 			}
 		}
@@ -992,22 +1013,22 @@ public:
 			b_height = height; //前フレームのときのheight取得用
 		}
 	}
-	void wave_graph(frame *f, float *samples, GraphPara *para, char mode) {
-		int num_sample = (int)(para->get_lim_max(0) - para->get_lim_min(0) + 1.0f);
+	void wave_graph(frame *f, float *samples, GraphPara *param, char mode) {
+		int num_sample = (int)(param->get_lim_max(param->get_x_dim()) - param->get_lim_min(param->get_x_dim()) + 1.0f);
 		wave_graph(
 			f,
 			samples,
 			num_sample,
-			(int)para->get_para(0, para->get_imin()),
-			(int)para->get_para(0, para->get_imax()),
-			para->get_para(1, para->get_imin()),
-			para->get_para(1, para->get_imax()),
+			(int)param->get_min(param->get_x_dim()),
+			(int)param->get_max(param->get_x_dim()),
+			param->get_min(param->get_y_dim()),
+			param->get_max(param->get_y_dim()),
 			mode
 		);
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
-		GraphPara *para;
+		GraphPara *param;
 		if (f->data.size() == 0) {
 			//インスタンス化
 			f->data.push_back(new frame);
@@ -1020,32 +1041,42 @@ public:
 				f->childs[0]->size = f->size;
 				f->childs[0]->length = f->length;
 				//グラフパラメータクラス
-				para = (GraphPara*)(f->data[1]); //クラスのポインタ代入
-				para->set_frame(f->childs[0]); //フレームのポインタ代入
-				para->create(1, 2, 0.0f, -1.0f); //最小値パラメータ生成
-				para->create(2, 2, (float)num_sample - 1.0f, 1.0f); //最大値パラメータ生成
-				para->create(0, 2, 30.0f, 0.0f); //テストパラメータ生成
-				para->limit_min(0.0f, 0); //x軸の最大可動範囲設定
-				para->limit_max((float)num_sample - 1.0f, 0); //x軸の最大可動範囲設定
-				para->limit_min(-2.0f, 1); //y軸の最大可動範囲設定
-				para->limit_max(2.0f, 1); //y軸の最大可動範囲設定
-				frames.resize(frames.get_root(f), frames.get_root(f)->pos); //リサイズ
+					param = (GraphPara*)(f->data[1]); //クラスのポインタ代入
+					param->set_frame(f->childs[0]); //フレームのポインタ代入
+					//パラメータ追加
+					param->create(2, 0.0f, -1.0f);
+					param->create(2, (float)num_sample, 1.0f);
+					param->create(2, 30.0f, 30.0f);
+					//パラメータの役割設定
+					param->set_min(0, 0);
+					param->set_max(1, 0);
+					param->set_min(0, 1);
+					param->set_max(1, 1);
+					//パラメータ可動域設定
+					param->limit_min(0.0f, 0);
+					param->limit_max((float)num_sample, 0);
+					param->limit_min(-2.0f, 1);
+					param->limit_max(2.0f, 1);
+					//ウィンドウのx,y座標に対応する次元数の設定
+					param->set_window_dim(0, 1);
+				//フレームリサイズ
+				frames.resize(frames.get_root(f), frames.get_root(f)->pos);
+
 		}else{
-			para = (GraphPara*)(f->data[1]);
+			param = (GraphPara*)(f->data[1]);
 		}
 		//グラフの描画
-		//wave_graph(f->childs[0], samples, num_sample , mode);
-		wave_graph(f->childs[0], samples, para, mode);
+		wave_graph(f->childs[0], samples, param, mode);
 		//パラメータ操作カーソル描画
-		cursor(para, para->get_imin(), 15); //グラフの最小値のパラメータ描画
-		cursor(para, para->get_imax(), 15); //グラフの最大値のパラメータ描画
-		cursor(para, 2, 15); //グラフの最大値のパラメータ描画
+		cursor(param, 0, 15); //グラフの最小値のパラメータ描画
+		cursor(param, 1, 15); //グラフの最大値のパラメータ描画
+		cursor(param, 2, 15); //テストパラメータ描画
 	}
 	//パラメータカーソル描画関数
-	void cursor(GraphPara *para, int index, int size) {
+	void cursor(GraphPara *param, int index, int size) {
 		POINT pos;
-		para->seek(index, win_event.mouse, win_event.l_click, size);
-		pos = para->get_pos(index);
+		param->seek(index, win_event.mouse, win_event.l_click, size);
+		pos = param->get_pos(index);
 		ofSetColor(255, 255, 255, 200);
 		ofRect(pos.x - size / 2, pos.y - size / 2, size, size);
 	}
