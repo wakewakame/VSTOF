@@ -332,11 +332,14 @@ public:
 			break;
 		}
 	}
-	//mode=3のとき、(limit_max-limit_min)取得
-	float get_lim_length(int dim) {
-		return (lim_max[dim] - lim_min[dim]);
+	//limit_min取得
+	float get_lim_min(int dim) {
+		return lim_min[dim];
 	}
-
+	//limit_max取得
+	float get_lim_max(int dim) {
+		return lim_max[dim];
+	}
 	//最小値インデックス取得関数
 	int get_imin() {
 		return min;
@@ -920,14 +923,14 @@ public:
 		}
 	}
 	//グラフ基盤UI(フレーム,波形配列,サンプル数,描画モード)
-	void wave_graph(frame *f, float *samples, int num_sample, char mode) {
+	void wave_graph(frame *f, float *samples, int num_sample, int start, int finish, float min, float max, char mode) {
 		//描画効率化のため、ピクセルの数に合わせて描画
 		int index = 0; //配列から値を参照するときのインデックス
 		float percentage = 0.0f;
 		float height; //今描画する波の高さ
 		float b_height; //前フレームのheight
 		for (int i = 0; i < f->size.x; i++) {
-			percentage = percent((float)i, 0.0f, (float)f->size.x, 0.0f, (float)num_sample - 1); //一時代入
+			percentage = percent((float)i, 0.0f, (float)f->size.x, (float)start, (float)finish); //一時代入
 			index = (int)percentage; //波形配列のインデックス算出
 			percentage = percentage - (float)index; //int,floatの性質上必ず正の数になる
 													//(念の為)index+1>=num_sampleになったらループ脱出
@@ -936,8 +939,8 @@ public:
 			}
 			//今描画する波の高さ
 			height =
-				percent(samples[index], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (1.0f - percentage) +
-				percent(samples[index + 1], 0.0f, 1.0f, 0.0f, (float)f->size.y * 0.7f) * (percentage);
+				percent(samples[index], min, max, (float)(f->pos.bottom), (float)(f->pos.top)) * (1.0f - percentage) +
+				percent(samples[index + 1], min, max, (float)(f->pos.bottom), (float)(f->pos.top)) * (percentage);
 			//f->size.x<num_sampleの時は塗りつぶし処理特殊
 			if (i % 2 == 0) {
 				ofSetColor(255, 255, 255, 255);
@@ -981,83 +984,26 @@ public:
 				ofSetColor(255, 255, 255, 255);
 				ofLine(
 					f->pos.left + i - 1,
-					f->pos.bottom - f->size.y / 2.0f - b_height,
+					b_height,
 					f->pos.left + i,
-					f->pos.bottom - f->size.y / 2.0f - height
+					height
 				);
 			}
 			b_height = height; //前フレームのときのheight取得用
 		}
 	}
 	void wave_graph(frame *f, float *samples, GraphPara *para, char mode) {
-		//描画効率化のため、ピクセルの数に合わせて描画
-		int index = 0; //配列から値を参照するときのインデックス
-		float percentage = 0.0f;
-		float height; //今描画する波の高さ
-		float b_height; //前フレームのheight
-		int num_sample = (int)(para->get_lim_length(0));
-		for (int i = 0; i < f->size.x; i++) {
-			percentage = percent((float)i, 0.0f, (float)f->size.x, para->get_para(0, para->get_imin()), para->get_para(0, para->get_imax())); //一時代入
-			index = (int)percentage; //波形配列のインデックス算出
-			percentage = percentage - (float)index; //int,floatの性質上必ず正の数になる
-			//(念の為)index+1>=num_sampleになったらループ脱出
-			if (index + 1 >= num_sample) {
-				break;
-			}
-			//今描画する波の高さ
-			height =
-				percent(samples[index], 0.0f, para->get_para(1, para->get_imax()), 0.0f, (float)f->size.y * 0.7f) * (1.0f - percentage) +
-				percent(samples[index + 1], 0.0f, para->get_para(1, para->get_imax()), 0.0f, (float)f->size.y * 0.7f) * (percentage);
-			//f->size.x<num_sampleの時は塗りつぶし処理特殊
-			if (i % 2 == 0) {
-				ofSetColor(255, 255, 255, 255);
-				switch (mode) {
-				case 0: //塗りつぶしなし
-					break;
-				case 1: //y=0.0を中心に塗りつぶし
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f - height,
-						1,
-						height
-					);
-					break;
-				case 2: //波形から下を塗りつぶし
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f - height,
-						1,
-						f->size.y / 2.0f + height
-					);
-					break;
-				case 3: //上限ライン描画
-					ofSetColor(255, 0, 0, 255);
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f - f->size.y * 0.7f / 2.0f,
-						1,
-						1
-					);
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f + f->size.y * 0.7f / 2.0f,
-						1,
-						1
-					);
-					break;
-				}
-			}
-			if (i > 0) {
-				ofSetColor(255, 255, 255, 255);
-				ofLine(
-					f->pos.left + i - 1,
-					f->pos.bottom - f->size.y / 2.0f - b_height,
-					f->pos.left + i,
-					f->pos.bottom - f->size.y / 2.0f - height
-				);
-			}
-			b_height = height; //前フレームのときのheight取得用
-		}
+		int num_sample = (int)(para->get_lim_max(0) - para->get_lim_min(0) + 1.0f);
+		wave_graph(
+			f,
+			samples,
+			num_sample,
+			(int)para->get_para(0, para->get_imin()),
+			(int)para->get_para(0, para->get_imax()),
+			para->get_para(1, para->get_imin()),
+			para->get_para(1, para->get_imax()),
+			mode
+		);
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
@@ -1081,8 +1027,8 @@ public:
 				para->create(0, 2, 30.0f, 0.0f); //テストパラメータ生成
 				para->limit_min(0.0f, 0); //x軸の最大可動範囲設定
 				para->limit_max((float)num_sample - 1.0f, 0); //x軸の最大可動範囲設定
-				para->limit_min(-1.0f, 1); //y軸の最大可動範囲設定
-				para->limit_max(1.0f, 1); //y軸の最大可動範囲設定
+				para->limit_min(-2.0f, 1); //y軸の最大可動範囲設定
+				para->limit_max(2.0f, 1); //y軸の最大可動範囲設定
 				frames.resize(frames.get_root(f), frames.get_root(f)->pos); //リサイズ
 		}else{
 			para = (GraphPara*)(f->data[1]);
