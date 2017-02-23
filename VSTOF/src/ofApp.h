@@ -226,6 +226,13 @@ public:
 		glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA, GL_ONE);
 		color[index].draw(x, y);
 	}
+	//フレームサイズ取得関数
+	POINT get_size(int index) {
+		POINT p;
+		p.x = color[index].getWidth();
+		p.y = color[index].getHeight();
+		return p;
+	}
 };
 //フレーム構造体
 struct frame {
@@ -272,6 +279,7 @@ private:
 	frame *f; //使用するフレームのポインタ
 	int x_dim; //ウィンドウx座標に対応する次元番号
 	int y_dim; //ウィンドウy座標に対応する次元番号
+	std::vector<float> length_min;
 public:
 	//コンストラクト
 	GraphPara() {
@@ -297,6 +305,7 @@ public:
 		while (param.size() < argnum) {
 			Dimension empty;
 			param.push_back(empty);
+			length_min.push_back(0.0f);
 			int dim = param.size() - 1;
 			param[dim].on_limit_min = 0;
 			param[dim].on_limit_max = 0;
@@ -319,6 +328,10 @@ public:
 	void set_max(int dim, int index) {
 		param[dim].max_index = index;
 	}
+	//最大値最小値パラメータ間の最小の距離設定
+	void set_length_min(int dim, float min) {
+		length_min[dim] = min;
+	}
 	//パラメータ取得関数
 	const float get_param(int dim, int index) {
 		return param[dim].val[index];
@@ -326,7 +339,7 @@ public:
 	//パラメータの可動域の最小値設定
 	void limit_min(float min, int dim) {
 		param[dim].on_limit_min = 1;
-		param[dim].limit_max = min;
+		param[dim].limit_min = min;
 	}
 	//パラメータの可動域の最大値設定
 	void limit_max(float max, int dim) {
@@ -434,16 +447,16 @@ public:
 		}
 		return 0;
 	}
-	const bool hit(POINT center, int size, POINT pos) {
+	const bool hit(POINT center, POINT size, POINT pos) {
 		return hit({
-			center.x - size / 2,
-			center.y - size / 2,
-			center.x + size / 2,
-			center.y + size / 2
+			center.x - size.x / 2,
+			center.y - size.y / 2,
+			center.x + size.x / 2,
+			center.y + size.y / 2
 		}, pos);
 	}
 	//ドラッグ時マウス追従関数
-	void seek(int index, POINT n_mouse, bool l_click, int size) {
+	void seek(int index, POINT n_mouse, bool l_click, POINT size) {
 		mouse = n_mouse;
 		if (hit(get_pos(index), size, n_mouse) && l_click) {
 			set_active(index);
@@ -474,11 +487,11 @@ public:
 				param[i].val[index] = get_lim_max(i);
 			}
 			//最小値<最大値の判定
-			if (get_min(i) > get_max(i)) {
+			if (abs(get_min(i) - get_max(i)) <= length_min[i]) {
 				if (active = get_imin(i)) {
-					param[i].val[get_imin(i)] = get_max(i);
+					param[i].val[get_imin(i)] = get_max(i) - length_min[i];
 				}else {
-					param[i].val[get_imax(i)] = get_min(i);
+					param[i].val[get_imax(i)] = get_min(i) + length_min[i];
 				}
 			}
 		}
@@ -878,6 +891,48 @@ public:
 		b_mouse = mouse;
 	}
 };
+//UIデザインパーツ格納クラス
+class UI_DESIGN {
+public:
+	FBO fbo;
+	char pointer_cursor = 0;
+	char zoom_cursor = 1;
+
+	UI_DESIGN() {
+		//バッファ確保
+		fbo.add(15, 15);
+		fbo.add(15, 15);
+		//描画
+			//ポインターカーソル
+			fbo.change_c(pointer_cursor);
+				ofSetColor(255, 255, 255, 255);
+				ofRect(0, 0, 15, 15);
+			fbo.change_c(-1);
+			fbo.change_a(pointer_cursor);
+				ofSetColor(0, 0, 0, 30);
+				ofRect(0, 0, 15, 15);
+				ofSetColor(0, 0, 0, 255);
+				ofRect(7, 0, 1, 4);
+				ofRect(7, 11, 1, 4);
+				ofRect(0, 7, 4, 1);
+				ofRect(11, 7, 4, 1);
+				ofRect(5, 5, 5, 5);
+				ofSetColor(0, 0, 0, 0);
+				ofRect(6, 6, 3, 3);
+			fbo.change_a(-1);
+			//ズームカーソル
+			fbo.change_c(zoom_cursor);
+				ofSetColor(255, 255, 255, 255);
+				ofRect(0, 0, 15, 15);
+			fbo.change_c(-1);
+			fbo.change_a(zoom_cursor);
+				ofSetColor(0, 0, 0, 255);
+				ofRect(0, 0, 15, 15);
+				ofSetColor(0, 0, 0, 30);
+				ofRect(5, 5, 5, 5);
+			fbo.change_a(-1);
+	}
+};
 //GUIクラス
 class GUI {
 public:
@@ -888,6 +943,7 @@ public:
 	//コンストラクト
 	WIN_EVENT win_event;
 	Frames frames;
+	UI_DESIGN ui;
 
 	//関数宣言
 	//単位変換関数
@@ -1045,40 +1101,66 @@ public:
 					param->set_frame(f->childs[0]); //フレームのポインタ代入
 					//パラメータ追加
 					param->create(2, 0.0f, -1.0f);
-					param->create(2, (float)num_sample, 1.0f);
-					param->create(2, 30.0f, 30.0f);
+					param->create(2, (float)num_sample - 1, 1.0f);
+					param->create(2, 30.0f, 0.3f);
 					//パラメータの役割設定
 					param->set_min(0, 0);
-					param->set_max(1, 0);
-					param->set_min(0, 1);
+					param->set_max(0, 1);
+					param->set_min(1, 0);
 					param->set_max(1, 1);
 					//パラメータ可動域設定
 					param->limit_min(0.0f, 0);
-					param->limit_max((float)num_sample, 0);
+					param->limit_max((float)num_sample - 1, 0);
 					param->limit_min(-2.0f, 1);
 					param->limit_max(2.0f, 1);
+					param->set_length_min(0, 0.001f);
+					param->set_length_min(1, 0.001f);
 					//ウィンドウのx,y座標に対応する次元数の設定
 					param->set_window_dim(0, 1);
 				//フレームリサイズ
 				frames.resize(frames.get_root(f), frames.get_root(f)->pos);
-
 		}else{
 			param = (GraphPara*)(f->data[1]);
 		}
 		//グラフの描画
 		wave_graph(f->childs[0], samples, param, mode);
 		//パラメータ操作カーソル描画
-		cursor(param, 0, 15); //グラフの最小値のパラメータ描画
-		cursor(param, 1, 15); //グラフの最大値のパラメータ描画
-		cursor(param, 2, 15); //テストパラメータ描画
+		cursor(param, 0, ui.zoom_cursor); //グラフの最小値のパラメータ描画
+		cursor(param, 1, ui.zoom_cursor); //グラフの最大値のパラメータ描画
+		cursor(param, 2, ui.pointer_cursor); //テストパラメータ描画
+	}
+	//ボリューム基盤UI
+	void volume(frame *f, float *val) {
+		int p1 = f->pos.left;
+		int p2 = f->pos.right;
+		int height = f->pos.top + f->size.y / 2;
+		ofSetColor(255, 255, 255, 255);
+		ofRect(p1, height, p2 - p1, 1);
+		ofRect(p1, height - 2, 1, 5);
+		ofRect(p2 - 1, height - 2, 1, 5);
+	}
+	//ボリュームUI
+	void volume_gui(frame *f, float *val) {
+		frame *vol_f;
+		if (f->data.size() == 0) {
+			f->data.push_back(new frame);
+		}
+		vol_f = (frame*)(f->data[0]);
+		vol_f->size.x = 200;
+		vol_f->size.y = 15;
+		vol_f->pos.left = f->pos.left + 4;
+		vol_f->pos.top = f->pos.top + 20;
+		vol_f->pos.right = vol_f->pos.left + vol_f->size.x;
+		vol_f->pos.bottom = vol_f->pos.top + vol_f->size.y;
+		volume(vol_f, val);
 	}
 	//パラメータカーソル描画関数
-	void cursor(GraphPara *param, int index, int size) {
+	void cursor(GraphPara *param, int index, char mode) {
 		POINT pos;
+		POINT size = ui.fbo.get_size(mode);
 		param->seek(index, win_event.mouse, win_event.l_click, size);
 		pos = param->get_pos(index);
-		ofSetColor(255, 255, 255, 200);
-		ofRect(pos.x - size / 2, pos.y - size / 2, size, size);
+		ui.fbo.draw_c(pos.x - size.x / 2, pos.y - size.y / 2, mode);
 	}
 	//スイッチUI
 	void sw(frame *f, bool *sw) {
@@ -1194,6 +1276,7 @@ public:
 	float fps;
 	RECT win_size;
 	bool a; //デバッグ用
+	float b; //デバッグ用
 
 			//コンストラクト
 	Parameteres para;
@@ -1227,6 +1310,7 @@ public:
 		{
 			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
+			gui.volume_gui(&para.p_frame.rawwave, &b);
 		}
 		//毎フレーム呼び出し関数
 		gui.loop();
