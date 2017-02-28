@@ -828,7 +828,7 @@ public:
 		frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
 		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
 		frames.add(&p_frame.all, &p_frame.tone, "tone", 0, 0); //音色設定フレーム生成
-		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 100, 0); //自動で音色を生成するか
+		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 500, 0); //自動で音色を生成するか
 		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 0); //下記インデントを束ねる
 		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 100, 0); //生波形データの使用をするかどうか
 		frames.add(&p_frame.raw_wave_para, &p_frame.rawwave, "rawwave", 100, 0); //生波形の使用部分波形(ファイルマッピングにするかも(´・ω・｀))
@@ -928,9 +928,11 @@ public:
 	char x_pointer_cursor = 0;
 	char xy_pointer_cursor = 1;
 	char zoom_cursor = 2;
+	char unit_line = 3;
 
 	UI_DESIGN() {
 		//バッファ確保
+		fbo.add(15, 15);
 		fbo.add(15, 15);
 		fbo.add(15, 15);
 		fbo.add(15, 15);
@@ -977,6 +979,18 @@ public:
 				ofRect(0, 0, 15, 15);
 				ofSetColor(0, 0, 0, 30);
 				ofRect(5, 5, 5, 5);
+			fbo.change_a(-1);
+			//単位線
+			fbo.change_c(unit_line);
+				ofSetColor(255, 255, 255, 255);
+				ofRect(0, 0, 15, 15);
+			fbo.change_c(-1);
+			fbo.change_a(unit_line);
+				ofSetColor(0, 0, 0, 0);
+				ofRect(0, 0, 15, 15);
+				ofSetColor(0, 0, 0, 255);
+				ofRect(0, 7, 15, 1);
+				ofRect(7, 0, 1, 15);
 			fbo.change_a(-1);
 	}
 };
@@ -1067,10 +1081,14 @@ public:
 		for (int i = 1; i < num ; i++) {
 			float x = first_x + (float)line.left + unit_gap_x * (float)i;
 			float y = first_y + (float)line.top + unit_gap_y * (float)i;
-			if ((x > line.right) || (x < line.left) || (y > line.bottom) || (y < line.top)) {
+			POINT size = ui.fbo.get_size(ui.unit_line);
+			if (
+				(abs(line.left - x) > abs(line.right - line.left))||
+				(abs(line.top - y) > abs(line.bottom - line.top))
+			) {
 				continue;
 			}
-			ui.fbo.draw_c((int)x, (int)y, ui.xy_pointer_cursor);
+			ui.fbo.draw_c((int)x - size.x/2, (int)y - size.y/2, ui.unit_line);
 		}
 		ofLine(line.left, line.top, line.right, line.bottom);
 	}
@@ -1196,9 +1214,9 @@ public:
 		unit_line(
 		{
 			(int)y_axis,
-			f->pos.top,
+			f->pos.bottom,
 			(int)y_axis,
-			f->pos.bottom
+			f->pos.top
 		},
 			y_lim_length,
 			y_min,
