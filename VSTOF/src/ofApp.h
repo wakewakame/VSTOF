@@ -280,6 +280,7 @@ private:
 	int x_dim; //ウィンドウx座標に対応する次元番号
 	int y_dim; //ウィンドウy座標に対応する次元番号
 	std::vector<float> length_min;
+	int height; //1次元のみの場合のパラメータのXorY座標
 public:
 	//コンストラクト
 	GraphPara() {
@@ -288,8 +289,12 @@ public:
 	//単位変換関数
 	float percent(float a, float a_min, float a_max, float b_min, float b_max) {
 		float b;
-		b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
-		return b;
+		if ((a_max - a_min) != 0) {
+			b = b_min + (b_max - b_min)*((a - a_min) / (a_max - a_min));
+			return b;
+		}else{
+			return 0.0f;
+		}
 	}
 	int percent(int a, int a_min, int a_max, int b_min, int b_max) {
 		return (int)percent((float)a, (float)a_min, (float)a_max, (float)b_min, (float)b_max);
@@ -387,6 +392,10 @@ public:
 		x_dim = set_x_dim;
 		y_dim = set_y_dim;
 	}
+	void set_window_dim(int set_x_dim, int set_y_dim, int set_height) {
+		set_window_dim(set_x_dim, set_y_dim);
+		height = set_height;
+	}
 	//ウィンドウのx座標に対応する次元数の取得
 	const int get_x_dim() {
 		return x_dim;
@@ -399,41 +408,62 @@ public:
 	const POINT get_pos(int index) {
 		POINT pos;
 		if (get_active() == index) {
-			pos = mouse;
+			if (x_dim != -1) {
+				pos.x = mouse.x;
+			}else{
+				pos.x = f->pos.left + height;
+			}
+			if (y_dim != -1) {
+				pos.y = mouse.y;
+			}else{
+				pos.y = f->pos.top + height;
+			}
 		}else{
-			pos.x = (int)(percent(
-				param[x_dim].val[index],
-				get_min(x_dim),
-				get_max(x_dim),
-				(float)f->pos.left,
-				(float)f->pos.right
-			));
-			pos.y = (int)(percent(
-				param[y_dim].val[index],
-				get_min(y_dim),
-				get_max(y_dim),
-				(float)f->pos.bottom,
-				(float)f->pos.top
-			));
+			if (x_dim != -1) {
+				pos.x = (int)(percent(
+					param[x_dim].val[index],
+					get_min(x_dim),
+					get_max(x_dim),
+					(float)f->pos.left,
+					(float)f->pos.right
+				));
+			}else{
+				pos.x = f->pos.left + height;
+			}
+			if (y_dim != -1) {
+				pos.y = (int)(percent(
+					param[y_dim].val[index],
+					get_min(y_dim),
+					get_max(y_dim),
+					(float)f->pos.bottom,
+					(float)f->pos.top
+				));
+			}else{
+				pos.y = f->pos.top + height;
+			}
 		}
 		return pos;
 	}
 	//パラメータ座標変換関数
 	void set_pos(POINT pos ,int index) {
-		param[x_dim].val[index] = percent(
-			(float)pos.x,
-			(float)f->pos.left,
-			(float)f->pos.right,
-			get_min(x_dim),
-			get_max(x_dim)
-		);
-		param[y_dim].val[index] = percent(
-			(float)pos.y,
-			(float)f->pos.bottom,
-			(float)f->pos.top,
-			get_min(y_dim),
-			get_max(y_dim)
-		);
+		if (x_dim != -1) {
+			param[x_dim].val[index] = percent(
+				(float)pos.x,
+				(float)f->pos.left,
+				(float)f->pos.right,
+				get_min(x_dim),
+				get_max(x_dim)
+			);
+		}
+		if (y_dim != -1) {
+			param[y_dim].val[index] = percent(
+				(float)pos.y,
+				(float)f->pos.bottom,
+				(float)f->pos.top,
+				get_min(y_dim),
+				get_max(y_dim)
+			);
+		}
 	}
 	//指定範囲内に指定地が存在するかどうかを判定する関数
 	const bool hit(RECT area, POINT pos) {
@@ -458,7 +488,7 @@ public:
 	//ドラッグ時マウス追従関数
 	void seek(int index, POINT n_mouse, bool l_click, POINT size) {
 		mouse = n_mouse;
-		if (hit(get_pos(index), size, n_mouse) && l_click) {
+		if (hit(get_pos(index), size, n_mouse) && l_click && get_active() == -1) {
 			set_active(index);
 		}
 		if ((get_active() == index) && (!l_click)) {
@@ -895,20 +925,37 @@ public:
 class UI_DESIGN {
 public:
 	FBO fbo;
-	char pointer_cursor = 0;
-	char zoom_cursor = 1;
+	char x_pointer_cursor = 0;
+	char xy_pointer_cursor = 1;
+	char zoom_cursor = 2;
 
 	UI_DESIGN() {
 		//バッファ確保
 		fbo.add(15, 15);
 		fbo.add(15, 15);
+		fbo.add(15, 15);
 		//描画
-			//ポインターカーソル
-			fbo.change_c(pointer_cursor);
+			//xポインターカーソル
+			fbo.change_c(x_pointer_cursor);
 				ofSetColor(255, 255, 255, 255);
 				ofRect(0, 0, 15, 15);
 			fbo.change_c(-1);
-			fbo.change_a(pointer_cursor);
+			fbo.change_a(x_pointer_cursor);
+				ofSetColor(0, 0, 0, 30);
+				ofRect(0, 0, 15, 15);
+				ofSetColor(0, 0, 0, 255);
+				ofRect(7, 0, 1, 4);
+				ofRect(7, 11, 1, 4);
+				ofRect(5, 5, 5, 5);
+				ofSetColor(0, 0, 0, 0);
+				ofRect(6, 6, 3, 3);
+			fbo.change_a(-1);
+			//xyポインターカーソル
+			fbo.change_c(xy_pointer_cursor);
+				ofSetColor(255, 255, 255, 255);
+				ofRect(0, 0, 15, 15);
+			fbo.change_c(-1);
+			fbo.change_a(xy_pointer_cursor);
 				ofSetColor(0, 0, 0, 30);
 				ofRect(0, 0, 15, 15);
 				ofSetColor(0, 0, 0, 255);
@@ -999,6 +1046,34 @@ public:
 			ofDrawBitmapString(root->name, root->pos.left + 4, root->pos.top + 12);
 		}
 	}
+	//単位線描画関数(単位を描画する線,線の本来の単位での長さ,描画するときの線の始まり地点の値,描画するときの線の終わりの地点の値,単位線の数)
+	void unit_line(RECT line, float length, float start, float finish, int num) {
+		float zoom = length / (finish - start); //拡大率
+		float gap_x = (float)(line.right - line.left) / (float)num; //zoom=1のときの単位線同士のx幅
+		float gap_y = (float)(line.bottom - line.top) / (float)num; //zoom=1のときの単位線同士のy幅
+		float unit_zoom = zoom / pow(2.0f, floor(log2(zoom))); //単位線の拡大率
+		float unit_gap_x = gap_x * unit_zoom; //単位線同士のx幅
+		float unit_gap_y = gap_y * unit_zoom; //単位線同士のy幅
+		float first_x = 0.0f; //描画する単位線のx軸における始めの位置
+		float first_y = 0.0f; //描画する単位線のy軸における始めの位置
+		if (line.right - line.left != 0.0f) {
+			first_x = (line.right - line.left) * start / (finish - start);
+			first_x = unit_gap_x * ceil(first_x / unit_gap_x) - first_x;
+		}
+		if (line.bottom - line.top != 0.0f) {
+			first_y = (line.bottom - line.top) * start / (finish - start);
+			first_y = unit_gap_y * ceil(first_y / unit_gap_y) - first_y;
+		}
+		for (int i = 1; i < num ; i++) {
+			float x = first_x + (float)line.left + unit_gap_x * (float)i;
+			float y = first_y + (float)line.top + unit_gap_y * (float)i;
+			if ((x > line.right) || (x < line.left) || (y > line.bottom) || (y < line.top)) {
+				continue;
+			}
+			ui.fbo.draw_c((int)x, (int)y, ui.xy_pointer_cursor);
+		}
+		ofLine(line.left, line.top, line.right, line.bottom);
+	}
 	//グラフ基盤UI(フレーム,波形配列,サンプル数,描画モード)
 	void wave_graph(frame *f, float *samples, int num_sample, int start, int finish, float min, float max, char mode) {
 		//描画効率化のため、ピクセルの数に合わせて描画
@@ -1082,6 +1157,55 @@ public:
 			mode
 		);
 	}
+	void wave_graph(frame *f, float *samples, GraphPara *param, char mode, char *x, char *y) {
+		//グラフ描画
+		wave_graph(f, samples, param, mode);
+		//単位線の描画
+		float x_min = param->get_min(param->get_x_dim()); //xの描画領域内の最小値取得
+		float x_max = param->get_max(param->get_x_dim()); //xの描画領域内の最大値取得
+		float y_min = param->get_min(param->get_y_dim()); //yの描画領域内の最小値取得
+		float y_max = param->get_max(param->get_y_dim()); //yの描画領域内の最大値取得
+		float x_lim_length = (param->get_lim_max(param->get_x_dim()) - param->get_lim_min(param->get_x_dim()));
+		float y_lim_length = (param->get_lim_max(param->get_y_dim()) - param->get_lim_min(param->get_y_dim()));
+		float x_axis = percent(0.0f, y_min, y_max, (float)f->pos.bottom, (float)f->pos.top); //x軸のy座標
+		float y_axis = percent(0.0f, x_min, x_max, (float)f->pos.left, (float)f->pos.right); //y軸のx座標
+		if (x_axis < f->pos.top) {
+			x_axis = f->pos.top;
+		}
+		if (x_axis > f->pos.bottom) {
+			x_axis = f->pos.bottom;
+		}
+		if (y_axis < f->pos.left) {
+			y_axis = f->pos.left;
+		}
+		if (y_axis > f->pos.right) {
+			y_axis = f->pos.right;
+		}
+		unit_line(
+		{
+			f->pos.left,
+			(int)x_axis,
+			f->pos.right,
+			(int)x_axis
+		},
+			x_lim_length,
+			x_min,
+			x_max,
+			8
+		);
+		unit_line(
+		{
+			(int)y_axis,
+			f->pos.top,
+			(int)y_axis,
+			f->pos.bottom
+		},
+			y_lim_length,
+			y_min,
+			y_max,
+			8
+		);
+	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
 		GraphPara *param;
@@ -1123,21 +1247,46 @@ public:
 			param = (GraphPara*)(f->data[1]);
 		}
 		//グラフの描画
-		wave_graph(f->childs[0], samples, param, mode);
+		wave_graph(f->childs[0], samples, param, mode, "", "");
 		//パラメータ操作カーソル描画
 		cursor(param, 0, ui.zoom_cursor); //グラフの最小値のパラメータ描画
 		cursor(param, 1, ui.zoom_cursor); //グラフの最大値のパラメータ描画
-		cursor(param, 2, ui.pointer_cursor); //テストパラメータ描画
+		cursor(param, 2, ui.xy_pointer_cursor); //テストパラメータ描画
 	}
 	//ボリューム基盤UI
 	void volume(frame *f, float *val) {
+		GraphPara *param;
 		int p1 = f->pos.left;
 		int p2 = f->pos.right;
-		int height = f->pos.top + f->size.y / 2;
+		int height = f->size.y / 2;
+		if (f->data.size() == 0) {
+			//グラフパラメータクラス
+				f->data.push_back(new GraphPara);
+				//クラスのポインタ代入
+				param = (GraphPara*)(f->data[0]);
+				//フレームのポインタ代入
+				param->set_frame(f);
+				//パラメータ追加
+				param->create(1, 0.0f);
+				param->create(1, 1.0f);
+				param->create(1, *val);
+				//パラメータの役割設定
+				param->set_min(0, 0);
+				param->set_max(0, 1);
+				//パラメータ可動域設定
+				param->limit_min(0.0f, 0);
+				param->limit_max(1.0f, 0);
+				//ウィンドウのx座標に対応する次元数の設定
+				param->set_window_dim(0, -1, height);
+		}else{
+			param = (GraphPara*)(f->data[0]);
+		}
 		ofSetColor(255, 255, 255, 255);
-		ofRect(p1, height, p2 - p1, 1);
-		ofRect(p1, height - 2, 1, 5);
-		ofRect(p2 - 1, height - 2, 1, 5);
+		ofRect(p1, f->pos.top + height, p2 - p1, 1);
+		ofRect(p1, f->pos.top + height - 2, 1, 5);
+		ofRect(p2 - 1, f->pos.top + height - 2, 1, 5);
+		cursor(param, 2, ui.x_pointer_cursor); //パラメータ描画
+		*val = param->get_param(0, 2);
 	}
 	//ボリュームUI
 	void volume_gui(frame *f, float *val) {
