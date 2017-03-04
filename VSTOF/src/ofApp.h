@@ -599,7 +599,15 @@ public:
 		return j;
 	}
 };
-
+//グラフのプロパティ
+struct graph {
+	float *samples;
+	int num_sample;
+	int start_index;
+	int end_index;
+	float val_min;
+	float val_max;
+};
 //共有メモリアクセスクラス
 class ShareMem {
 public:
@@ -828,7 +836,7 @@ public:
 		frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
 		frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
 		frames.add(&p_frame.all, &p_frame.tone, "tone", 0, 0); //音色設定フレーム生成
-		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 500, 0); //自動で音色を生成するか
+		frames.add(&p_frame.tone, &p_frame.make_auto, "make_auto", 200, 0); //自動で音色を生成するか
 		frames.add(&p_frame.tone, &p_frame.raw_wave_para, "raw_wave_para", 0, 0); //下記インデントを束ねる
 		frames.add(&p_frame.raw_wave_para, &p_frame.use_rawwave, "use_rawwave", 100, 0); //生波形データの使用をするかどうか
 		frames.add(&p_frame.raw_wave_para, &p_frame.rawwave, "rawwave", 100, 0); //生波形の使用部分波形(ファイルマッピングにするかも(´・ω・｀))
@@ -1078,7 +1086,7 @@ public:
 			first_y = (line.bottom - line.top) * start / (finish - start);
 			first_y = unit_gap_y * ceil(first_y / unit_gap_y) - first_y;
 		}
-		for (int i = 1; i < num ; i++) {
+		for (int i = 0; i < num ; i++) {
 			float x = first_x + (float)line.left + unit_gap_x * (float)i;
 			float y = first_y + (float)line.top + unit_gap_y * (float)i;
 			POINT size = ui.fbo.get_size(ui.unit_line);
@@ -1093,63 +1101,26 @@ public:
 		ofLine(line.left, line.top, line.right, line.bottom);
 	}
 	//グラフ基盤UI(フレーム,波形配列,サンプル数,描画モード)
-	void wave_graph(frame *f, float *samples, int num_sample, int start, int finish, float min, float max, char mode) {
+	void wave_graph(frame *f, graph g, bool mode) {
 		//描画効率化のため、ピクセルの数に合わせて描画
 		int index = 0; //配列から値を参照するときのインデックス
 		float percentage = 0.0f;
 		float height; //今描画する波の高さ
 		float b_height; //前フレームのheight
+		float zero = percent(0.0f, g.val_min, g.val_max, (float)(f->pos.bottom), (float)(f->pos.top)); //グラフy座標が0のときのフレームy座標
 		for (int i = 0; i < f->size.x; i++) {
-			percentage = percent((float)i, 0.0f, (float)f->size.x, (float)start, (float)finish); //一時代入
+			percentage = percent((float)i, 0.0f, (float)f->size.x, (float)g.start_index, (float)g.end_index); //一時代入
 			index = (int)percentage; //波形配列のインデックス算出
 			percentage = percentage - (float)index; //int,floatの性質上必ず正の数になる
-													//(念の為)index+1>=num_sampleになったらループ脱出
-			if (index + 1 >= num_sample) {
+			//(念の為)index+1>=num_sampleになったらループ脱出
+			if (index + 1 >= g.num_sample) {
 				break;
 			}
 			//今描画する波の高さ
 			height =
-				percent(samples[index], min, max, (float)(f->pos.bottom), (float)(f->pos.top)) * (1.0f - percentage) +
-				percent(samples[index + 1], min, max, (float)(f->pos.bottom), (float)(f->pos.top)) * (percentage);
-			//f->size.x<num_sampleの時は塗りつぶし処理特殊
-			if (i % 2 == 0) {
-				ofSetColor(255, 255, 255, 255);
-				switch (mode) {
-				case 0: //塗りつぶしなし
-					break;
-				case 1: //y=0.0を中心に塗りつぶし
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f - height,
-						1,
-						height
-					);
-					break;
-				case 2: //波形から下を塗りつぶし
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f - height,
-						1,
-						f->size.y / 2.0f + height
-					);
-					break;
-				case 3: //上限ライン描画
-					ofSetColor(255, 0, 0, 255);
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f - f->size.y * 0.7f / 2.0f,
-						1,
-						1
-					);
-					ofRect(
-						f->pos.left + i,
-						f->pos.bottom - f->size.y / 2.0f + f->size.y * 0.7f / 2.0f,
-						1,
-						1
-					);
-					break;
-				}
-			}
+				percent(g.samples[index], g.val_min, g.val_max, (float)(f->pos.bottom), (float)(f->pos.top)) * (1.0f - percentage) +
+				percent(g.samples[index + 1], g.val_min, g.val_max, (float)(f->pos.bottom), (float)(f->pos.top)) * (percentage);
+			//グラフ描画
 			if (i > 0) {
 				ofSetColor(255, 255, 255, 255);
 				ofLine(
@@ -1159,23 +1130,37 @@ public:
 					height
 				);
 			}
+			//塗りつぶし
+			if (mode) {
+				if ((i / 10) % 2 == 0) {
+					ofSetColor(255, 255, 255, 255);
+					ofLine(
+						f->pos.left + i,
+						zero,
+						f->pos.left + i,
+						height
+					);
+				}
+			}
 			b_height = height; //前フレームのときのheight取得用
 		}
 	}
-	void wave_graph(frame *f, float *samples, GraphPara *param, char mode) {
+	void wave_graph(frame *f, float *samples, GraphPara *param, bool mode) {
 		int num_sample = (int)(param->get_lim_max(param->get_x_dim()) - param->get_lim_min(param->get_x_dim()) + 1.0f);
 		wave_graph(
 			f,
-			samples,
-			num_sample,
-			(int)param->get_min(param->get_x_dim()),
-			(int)param->get_max(param->get_x_dim()),
-			param->get_min(param->get_y_dim()),
-			param->get_max(param->get_y_dim()),
+			{
+				samples,
+				num_sample,
+				(int)param->get_min(param->get_x_dim()),
+				(int)param->get_max(param->get_x_dim()),
+				param->get_min(param->get_y_dim()),
+				param->get_max(param->get_y_dim())
+			},
 			mode
 		);
 	}
-	void wave_graph(frame *f, float *samples, GraphPara *param, char mode, char *x, char *y) {
+	void wave_graph(frame *f, float *samples, GraphPara *param, bool mode, char *x, char *y) {
 		//グラフ描画
 		wave_graph(f, samples, param, mode);
 		//単位線の描画
@@ -1225,7 +1210,7 @@ public:
 		);
 	}
 	//拡大縮小可能なグラフ描画関数
-	void wave_gui(frame *f, float *samples, int num_sample, char mode) {
+	void wave_gui(frame *f, float *samples, int num_sample, bool mode) {
 		GraphPara *param;
 		if (f->data.size() == 0) {
 			//インスタンス化
@@ -1475,7 +1460,7 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
+			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 1);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 			gui.volume_gui(&para.p_frame.rawwave, &b);
 		}
