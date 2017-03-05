@@ -601,12 +601,16 @@ public:
 };
 //グラフのプロパティ
 struct graph {
-	float *samples;
-	int num_sample;
-	int start_index;
-	int end_index;
-	float val_min;
-	float val_max;
+	float *samples; //波形本体
+	int num_sample; //波形のサンプル数
+	int start_index; //描画領域の始めの波形のサンプルのインデックス
+	int end_index; //描画領域の終わりの波形のサンプルのインデックス
+	float zero_index_val; //波形のサンプルが0の地点のグラフ上の単位のx座標
+	float last_index_val; //波形のサンプルが最終地点のグラフ上の単位のx座標
+	float val_min; //描画領域のサンプル値の最小値
+	float val_max; //描画領域のサンプル値の最大値
+	float val_lim_min; //描画領域のサンプル値の最小値の可動域の最小値
+	float val_lim_max; //描画領域のサンプル値の最大値の可動域の最大値
 };
 //共有メモリアクセスクラス
 class ShareMem {
@@ -1145,31 +1149,30 @@ public:
 			b_height = height; //前フレームのときのheight取得用
 		}
 	}
-	void wave_graph(frame *f, float *samples, GraphPara *param, bool mode) {
-		int num_sample = (int)(param->get_lim_max(param->get_x_dim()) - param->get_lim_min(param->get_x_dim()) + 1.0f);
-		wave_graph(
-			f,
-			{
-				samples,
-				num_sample,
-				(int)param->get_min(param->get_x_dim()),
-				(int)param->get_max(param->get_x_dim()),
-				param->get_min(param->get_y_dim()),
-				param->get_max(param->get_y_dim())
-			},
-			mode
-		);
+	//パラメータクラスをグラフプロパティクラスに変換する関数
+	graph c_graph(float *samples, GraphPara *param) {
+		graph req;
+		req.samples = samples;
+		req.start_index = (int)(param->get_min(param->get_x_dim()));
+		req.end_index = (int)(param->get_max(param->get_x_dim()));
+		req.zero_index_val = param->get_lim_min(param->get_x_dim());
+		req.last_index_val = param->get_lim_max(param->get_x_dim());
+		req.val_min = param->get_min(param->get_y_dim());
+		req.val_max = param->get_max(param->get_y_dim());
+		req.val_lim_min = param->get_lim_min(param->get_y_dim());
+		req.val_lim_max = param->get_lim_max(param->get_y_dim());
+		req.num_sample = (int)(req.last_index_val - req.zero_index_val) + 1;
+		return req;
 	}
-	void wave_graph(frame *f, float *samples, GraphPara *param, bool mode, char *x, char *y) {
-		//グラフ描画
-		wave_graph(f, samples, param, mode);
+	//グラフに単位線をつける関数
+	void graph_unitline(frame *f, graph g, char *x, char *y) {
 		//単位線の描画
-		float x_min = param->get_min(param->get_x_dim()); //xの描画領域内の最小値取得
-		float x_max = param->get_max(param->get_x_dim()); //xの描画領域内の最大値取得
-		float y_min = param->get_min(param->get_y_dim()); //yの描画領域内の最小値取得
-		float y_max = param->get_max(param->get_y_dim()); //yの描画領域内の最大値取得
-		float x_lim_length = (param->get_lim_max(param->get_x_dim()) - param->get_lim_min(param->get_x_dim()));
-		float y_lim_length = (param->get_lim_max(param->get_y_dim()) - param->get_lim_min(param->get_y_dim()));
+		float x_min = g.start_index; //xの描画領域内の最小値取得
+		float x_max = g.end_index; //xの描画領域内の最大値取得
+		float y_min = g.val_min; //yの描画領域内の最小値取得
+		float y_max = g.val_max; //yの描画領域内の最大値取得
+		float x_lim_length = (float)(g.num_sample);
+		float y_lim_length = (g.val_lim_max - g.val_lim_min);
 		float x_axis = percent(0.0f, y_min, y_max, (float)f->pos.bottom, (float)f->pos.top); //x軸のy座標
 		float y_axis = percent(0.0f, x_min, x_max, (float)f->pos.left, (float)f->pos.right); //y軸のx座標
 		if (x_axis < f->pos.top) {
@@ -1208,6 +1211,8 @@ public:
 			y_max,
 			8
 		);
+		ofDrawBitmapString(x, f->pos.left, f->pos.top);
+		ofDrawBitmapString(y, f->pos.right, f->pos.bottom);
 	}
 	//拡大縮小可能なグラフ描画関数
 	void wave_gui(frame *f, float *samples, int num_sample, bool mode) {
@@ -1250,7 +1255,9 @@ public:
 			param = (GraphPara*)(f->data[1]);
 		}
 		//グラフの描画
-		wave_graph(f->childs[0], samples, param, mode, "", "");
+		graph g = c_graph(samples, param);
+		wave_graph(f->childs[0], g, mode);
+		graph_unitline(f->childs[0], g, "ms", "dB");
 		//パラメータ操作カーソル描画
 		cursor(param, 0, ui.zoom_cursor); //グラフの最小値のパラメータ描画
 		cursor(param, 1, ui.zoom_cursor); //グラフの最大値のパラメータ描画
@@ -1460,7 +1467,7 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 1);
+			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 			gui.volume_gui(&para.p_frame.rawwave, &b);
 		}
