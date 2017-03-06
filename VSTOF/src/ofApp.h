@@ -1215,50 +1215,40 @@ public:
 		ofDrawBitmapString(y, f->pos.right, f->pos.bottom);
 	}
 	//マウスで書き換え可能なグラフ描画関数
-	void wave_draw(frame *f, float *samples, int num_sample, bool mode) {
-		graph g;
-		g.samples = samples;
-		g.start_index = 0;
-		g.end_index = num_sample - 1;
-		g.zero_index_val = 0;
-		g.last_index_val = num_sample - 1;
-		g.val_min = -1.0f;
-		g.val_max = 1.0f;
-		g.val_lim_min = -1.0f;
-		g.val_lim_max = 1.0f;
-		g.num_sample = num_sample;
+	void wave_draw(frame *f, graph g, bool mode, bool active) {
+		if (!active) {
+			return;
+		}
 		if (win_event.in(f->pos) && win_event.l_click) {
-			if (win_event.b_l_click) {
-				int start_index;
-				int end_index;
-				float start_height;
-				float end_height;
-				if (win_event.b_mouse.x < win_event.mouse.x) {
-					start_index = percent(win_event.b_mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-					end_index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-					start_height = percent((float)win_event.b_mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
-					end_height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+			int start_index;
+			int end_index;
+			float start_height;
+			float end_height;
+			if (win_event.b_mouse.x < win_event.mouse.x) {
+				start_index = percent(win_event.b_mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
+				end_index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
+				start_height = percent((float)win_event.b_mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+				end_height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+			}else{
+				start_index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
+				end_index = percent(win_event.b_mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
+				start_height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+				end_height = percent((float)win_event.b_mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+			}
+			for (int i = 0; i < (end_index - start_index + 1); i++) {
+				float percentage;
+				if (end_index != start_index) {
+					percentage = (float)(i) / (float)(end_index - start_index);
 				}else{
-					start_index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-					end_index = percent(win_event.b_mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-					start_height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
-					end_height = percent((float)win_event.b_mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+					percentage = (float)(start_index);
 				}
-				for (int i = 0; i < (end_index - start_index + 1); i++) {
-					float percentage = (float)(i) / (float)(end_index - start_index);
-					int index = start_index + i;
-					float height = 
-						start_height * (1.0f - percentage) +
-						end_height * (percentage);
-					if (index < g.num_sample) {
-						samples[index] = height;
-					}
-				}
-			}else {
-				int index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-				float height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
+				int index = start_index + i;
+				float height = 
+					start_height * (1.0f - percentage) +
+					end_height * (percentage);
 				if (index < g.num_sample) {
-					samples[index] = height;
+					g.samples[index] = height;
+					std::cout << height << std::endl;
 				}
 			}
 		}
@@ -1308,6 +1298,7 @@ public:
 		graph g = c_graph(samples, param);
 		wave_graph(f->childs[0], g, mode);
 		graph_unitline(f->childs[0], g, "ms", "dB");
+		wave_draw(f->childs[0], g, mode, 1);
 		//パラメータ操作カーソル描画
 		cursor(param, 0, ui.zoom_cursor); //グラフの最小値のパラメータ描画
 		cursor(param, 1, ui.zoom_cursor); //グラフの最大値のパラメータ描画
@@ -1517,8 +1508,7 @@ public:
 		gui.FrameName(&para.p_frame.root);
 		//各パラメーター描画
 		{
-			//gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
-			gui.wave_draw(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
+			gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
 			gui.sw(&para.p_frame.raw_wave_para, &a);
 			gui.volume_gui(&para.p_frame.rawwave, &b);
 		}
