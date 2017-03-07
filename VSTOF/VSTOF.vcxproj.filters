@@ -7,6 +7,19 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\GUI.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Animation.cpp" />
+    <ClCompile Include="src\FBO.cpp" />
+    <ClCompile Include="src\Frame.cpp" />
+    <ClCompile Include="src\GraphPara.cpp" />
+    <ClCompile Include="src\ShareMem.cpp" />
+    <ClCompile Include="src\ui_design.cpp" />
+    <ClCompile Include="src\win_event.cpp" />
+    <ClCompile Include="src\Placement.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -18,6 +31,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ofApp.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GUI.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Animation.h" />
+    <ClInclude Include="src\FBO.h" />
+    <ClInclude Include="src\Frame.h" />
+    <ClInclude Include="src\GraphPara.h" />
+    <ClInclude Include="src\ShareMem.h" />
+    <ClInclude Include="src\ui_design.h" />
+    <ClInclude Include="src\win_event.h" />
+    <ClInclude Include="src\Placement.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>

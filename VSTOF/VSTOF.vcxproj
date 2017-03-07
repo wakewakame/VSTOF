@@ -176,11 +176,29 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Animation.cpp" />
+    <ClCompile Include="src\FBO.cpp" />
+    <ClCompile Include="src\Frame.cpp" />
+    <ClCompile Include="src\GraphPara.cpp" />
+    <ClCompile Include="src\GUI.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
+    <ClCompile Include="src\Placement.cpp" />
+    <ClCompile Include="src\ShareMem.cpp" />
+    <ClCompile Include="src\ui_design.cpp" />
+    <ClCompile Include="src\win_event.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Animation.h" />
+    <ClInclude Include="src\FBO.h" />
+    <ClInclude Include="src\Frame.h" />
+    <ClInclude Include="src\GraphPara.h" />
+    <ClInclude Include="src\GUI.h" />
     <ClInclude Include="src\ofApp.h" />
+    <ClInclude Include="src\Placement.h" />
+    <ClInclude Include="src\ShareMem.h" />
+    <ClInclude Include="src\ui_design.h" />
+    <ClInclude Include="src\win_event.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="$(OF_ROOT)\libs\openFrameworksCompiled\project\vs\openframeworksLib.vcxproj">
