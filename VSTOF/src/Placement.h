@@ -82,32 +82,26 @@ public:
 			}
 		}
 		if (f->parent != nullptr) {
-			if (f->parent->childs[0] == f) {
-				if (f->childs.size() == 1) {
-					tree += "„ª";
-				}else {
-					tree += "„±";
+			tree += "\n";
+			for (int i = 0; i < gap.size(); i++) {
+				for (int j = 0; j < gap[i]; j++) {
+					tree += " ";
 				}
+				if (i == (gap.size() - 1)) {
+					break;
+				}
+				tree += "„«";
+			}
+			if (f->parent->childs[f->parent->childs.size() - 1] == f) {
+				tree += "„¯";
 			}else {
-				tree += "\n";
-				for(int i = 0; i < gap.size(); i++) {
-					for (int j = 0; j < gap[i]; j++) {
-						tree += " ";
-					}
-					if (i == (gap.size() - 1)) {
-						break;
-					}
-					tree += "„«";
-				}
-				if (f->parent->childs[f->parent->childs.size() - 1] == f) {
-					tree += "„¯";
-				}else {
-					tree += "„°";
-				}
+				tree += "„°";
 			}
 		}
+		tree += "[";
 		tree += f->name;
-		gap.push_back(f->name.length());
+		tree += "]";
+		gap.push_back(0);
 		for (int i = 0; i < f->childs.size(); i++) {
 			tree = draw_node_name(f->childs[i], gap, tree);
 		}
