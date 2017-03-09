@@ -86,9 +86,19 @@ void GUI::unit_line(RECT line, float length, float start, float finish, int num)
 	ofLine(line.left, line.top, line.right, line.bottom);
 }
 
-GraphPos GUI::conversion(WindowPos) {
-
+GraphPos GUI::conversion_g(frame *f, graph g, WindowPos w_pos) {
+	GraphPos g_pos;
+	g_pos.x = percent(w_pos.x ,f->pos.left, f->pos.right, g.start_index, g.end_index);
+	g_pos.y = percent((float)w_pos.y, (float)(f->pos.bottom), (float)(f->pos.top), g.val_min, g.val_max);
+	return g_pos;
 }
+WindowPos GUI::conversion_w(frame *f, graph g, GraphPos g_pos) {
+	WindowPos w_pos;
+	w_pos.x = percent(g_pos.x, g.start_index, g.end_index, f->pos.left, f->pos.right);
+	w_pos.y = (int)percent((float)g_pos.y, g.val_min, g.val_max, (float)(f->pos.bottom), (float)(f->pos.top));
+	return w_pos;
+}
+
 
 void GUI::wave_graph(frame *f, graph g, bool mode) {
 	//描画効率化のため、ピクセルの数に合わせて描画
@@ -151,44 +161,33 @@ graph GUI::c_graph(float *samples, GraphPara *param) {
 }
 
 void GUI::graph_unitline(frame *f, graph g, char *x, char *y) {
-	//単位線の描画
+	//変数宣言
 	float x_min = g.start_index; //xの描画領域内の最小値取得
 	float x_max = g.end_index; //xの描画領域内の最大値取得
 	float y_min = g.val_min; //yの描画領域内の最小値取得
 	float y_max = g.val_max; //yの描画領域内の最大値取得
 	float x_lim_length = (float)(g.num_sample);
 	float y_lim_length = (g.val_lim_max - g.val_lim_min);
-	float x_axis = percent(0.0f, y_min, y_max, (float)f->pos.bottom, (float)f->pos.top); //x軸のy座標
-	float y_axis = percent(0.0f, x_min, x_max, (float)f->pos.left, (float)f->pos.right); //y軸のx座標
-	if (x_axis < f->pos.top) {
-		x_axis = f->pos.top;
+	WindowPos axis = conversion_w(f, g, {0,0.0f}); //xy軸のウィンドウ座標
+	//軸位置制御
+	if (axis.x < f->pos.left) {
+		axis.x = f->pos.left;
 	}
-	if (x_axis > f->pos.bottom) {
-		x_axis = f->pos.bottom;
+	if (axis.x > f->pos.right) {
+		axis.x = f->pos.right;
 	}
-	if (y_axis < f->pos.left) {
-		y_axis = f->pos.left;
+	if (axis.y < f->pos.top) {
+		axis.y = f->pos.top;
 	}
-	if (y_axis > f->pos.right) {
-		y_axis = f->pos.right;
+	if (axis.y > f->pos.bottom) {
+		axis.y = f->pos.bottom;
 	}
+	//軸描画
 	unit_line(
 	{
-		f->pos.left,
-		(int)x_axis,
-		f->pos.right,
-		(int)x_axis
-	},
-		x_lim_length,
-		x_min,
-		x_max,
-		8
-	);
-	unit_line(
-	{
-		(int)y_axis,
+		(int)axis.x,
 		f->pos.bottom,
-		(int)y_axis,
+		(int)axis.x,
 		f->pos.top
 	},
 		y_lim_length,
@@ -196,46 +195,48 @@ void GUI::graph_unitline(frame *f, graph g, char *x, char *y) {
 		y_max,
 		8
 	);
+	unit_line(
+	{
+		f->pos.left,
+		(int)axis.y,
+		f->pos.right,
+		(int)axis.y
+	},
+		x_lim_length,
+		x_min,
+		x_max,
+		8
+	);
+	//単位文字列描画
 	ofDrawBitmapString(x, f->pos.left, f->pos.top);
 	ofDrawBitmapString(y, f->pos.right, f->pos.bottom);
 }
 
 void GUI::wave_draw(frame *f, graph g, bool mode, bool active) {
 	if (!active) {
+		wave_graph(f, g, mode);
 		return;
 	}
 	if (win_event.in(f->pos) && win_event.l_click) {
-		int start_index;
-		int end_index;
-		float start_height;
-		float end_height;
-		if (win_event.b_mouse.x < win_event.mouse.x) {
-			start_index = percent(win_event.b_mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-			end_index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-			start_height = percent((float)win_event.b_mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
-			end_height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
-		}
-		else {
-			start_index = percent(win_event.mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-			end_index = percent(win_event.b_mouse.x, f->pos.left, f->pos.right, g.start_index, g.end_index);
-			start_height = percent((float)win_event.mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
-			end_height = percent((float)win_event.b_mouse.y, (float)f->pos.bottom, (float)f->pos.top, g.val_min, g.val_max);
-		}
-		for (int i = 0; i < (end_index - start_index + 1); i++) {
-			float percentage;
-			if (end_index != start_index) {
-				percentage = (float)(i) / (float)(end_index - start_index);
+		GraphPos start = conversion_g(f, g, win_event.b_mouse);
+		GraphPos end = conversion_g(f, g, win_event.mouse);
+		if (start.x == end.x) {
+			if ((start.x >= 0) || (start.x <= g.num_sample - 1)) {
+				g.samples[start.x] = start.y;
 			}
-			else {
-				percentage = (float)(start_index);
-			}
-			int index = start_index + i;
-			float height =
-				start_height * (1.0f - percentage) +
-				end_height * (percentage);
-			if (index < g.num_sample) {
-				g.samples[index] = height;
-				std::cout << height << std::endl;
+		}else{
+			int index;
+			bool minus = (start.x > end.x);
+			float p;
+			for (int i = 0; i < abs(start.x - end.x) + 1; i++) {
+				p = (float)i / (float)abs(start.x - end.x);
+				index = start.x + (1-2*minus)*i;
+				if ((index < 0) || (index > g.num_sample - 1)) {
+					break;
+				}
+				g.samples[index] =
+					start.y * (1.0f - p) +
+					end.y * p;
 			}
 		}
 	}
@@ -284,13 +285,12 @@ void GUI::wave_gui(frame *f, float *samples, int num_sample, bool mode) {
 	}
 	//グラフの描画
 	graph g = c_graph(samples, param);
-	wave_graph(f->childs[0], g, mode);
 	graph_unitline(f->childs[0], g, "ms", "dB");
 	//パラメータ操作カーソル描画
 	cursor(param, 0, ui.zoom_cursor); //グラフの最小値のパラメータ描画
 	cursor(param, 1, ui.zoom_cursor); //グラフの最大値のパラメータ描画
 	cursor(param, 2, ui.xy_pointer_cursor); //テストパラメータ描画
-											//グラフの書き換え
+	//グラフの書き換え
 	wave_draw(f->childs[0], g, mode, param->get_active() == -1);
 }
 

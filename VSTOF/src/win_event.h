@@ -6,8 +6,8 @@
 class WIN_EVENT {
 public:
 	//変数宣言
-	POINT mouse; //現在のマウス座標
-	POINT b_mouse; //前フレーム時のマウス座標
+	WindowPos mouse; //現在のマウス座標
+	WindowPos b_mouse; //前フレーム時のマウス座標
 	bool l_click; //現在の左クリック情報(押されていたら1)
 	bool b_l_click; //前フレームのl_click変数の内容
 

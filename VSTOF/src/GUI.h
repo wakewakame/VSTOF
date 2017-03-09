@@ -36,8 +36,9 @@ public:
 	void FrameName(frame *root);
 	//単位線描画関数(単位を描画する線,線の本来の単位での長さ,描画するときの線の始まり地点の値,描画するときの線の終わりの地点の値,単位線の数)
 	void unit_line(RECT line, float length, float start, float finish, int num);
-	//グラフ座標からウィンドウ座標に変換する関数
-	GraphPos conversion(WindowPos);
+	//グラフ座標<->ウィンドウ座標に変換する関数
+	GraphPos conversion_g(frame *f, graph g, WindowPos w_pos);
+	WindowPos conversion_w(frame *f, graph g, GraphPos g_pos);
 	//グラフ基盤UI(フレーム,波形配列,サンプル数,描画モード)
 	void wave_graph(frame *f, graph g, bool mode);
 	//パラメータクラスをグラフプロパティクラスに変換する関数

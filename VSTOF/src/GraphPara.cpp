@@ -171,7 +171,7 @@ const POINT GraphPara::get_pos(int index) {
 	return pos;
 }
 
-void GraphPara::set_pos(POINT pos, int index) {
+void GraphPara::set_pos(WindowPos pos, int index) {
 	if (x_dim != -1) {
 		param[x_dim].val[index] = percent(
 			(float)pos.x,
@@ -192,7 +192,7 @@ void GraphPara::set_pos(POINT pos, int index) {
 	}
 }
 
-const bool GraphPara::hit(RECT area, POINT pos) {
+const bool GraphPara::hit(RECT area, WindowPos pos) {
 	if (
 		(area.left <= pos.x) &&
 		(area.top <= pos.y) &&
@@ -203,7 +203,7 @@ const bool GraphPara::hit(RECT area, POINT pos) {
 	}
 	return 0;
 }
-const bool GraphPara::hit(POINT center, POINT size, POINT pos) {
+const bool GraphPara::hit(POINT center, POINT size, WindowPos pos) {
 	return hit({
 		center.x - size.x / 2,
 		center.y - size.y / 2,
@@ -212,7 +212,7 @@ const bool GraphPara::hit(POINT center, POINT size, POINT pos) {
 	}, pos);
 }
 
-void GraphPara::seek(int index, POINT n_mouse, bool l_click, POINT size) {
+void GraphPara::seek(int index, WindowPos n_mouse, bool l_click, POINT size) {
 	mouse = n_mouse;
 	if (hit(get_pos(index), size, n_mouse) && l_click && get_active() == -1) {
 		set_active(index);
