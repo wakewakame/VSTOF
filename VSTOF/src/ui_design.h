@@ -1,3 +1,8 @@
+#pragma once
+
+#include "define.h"
+#include "FBO.h"
+
 //UIデザインパーツ格納クラス
 class UI_DESIGN {
 public:

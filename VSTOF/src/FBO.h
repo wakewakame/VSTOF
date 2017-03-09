@@ -1,3 +1,7 @@
+#pragma once
+
+#include "define.h"
+
 //フレームバッファクラス
 class FBO {
 public:

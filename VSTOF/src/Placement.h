@@ -1,3 +1,10 @@
+#pragma once
+
+#include "define.h"
+#include "Frame.h"
+#include "ShareMem.h"
+#include "GUI.h"
+
 //パラメーター値構造体
 struct VSTParameteresFrames {
 	frame root;
@@ -47,9 +54,8 @@ public:
 				   //変数初期化
 	VSTParameteres *p_value; //パラメーター値変数群ポインタ
 	VSTParameteresFrames p_frame; //パラメーターフレーム変数群
-	VSTParameteresLength p_length; //パラメーター表示範囲変数群
 
-								   //関数宣言
+	//関数宣言
 	//コンストラクタ
 	Parameteres();
 	//デストラクタ

@@ -1,33 +1,12 @@
+#pragma once
+
 //インクルード
-#include "ofMain.h"
+#include "define.h"
 #include "Frame.h"
 #include "win_event.h"
-
-//グラフ上の座標
-struct GraphPos {
-	int x;
-	float y;
-};
-
-//ウィンドウ上の座標
-struct WindowPos {
-	int x;
-	int y;
-};
-
-//グラフのプロパティ
-struct graph {
-	float *samples; //波形本体
-	int num_sample; //波形のサンプル数
-	int start_index; //描画領域の始めの波形のサンプルのインデックス
-	int end_index; //描画領域の終わりの波形のサンプルのインデックス
-	float zero_index_val; //波形のサンプルが0の地点のグラフ上の単位のx座標
-	float last_index_val; //波形のサンプルが最終地点のグラフ上の単位のx座標
-	float val_min; //描画領域のサンプル値の最小値
-	float val_max; //描画領域のサンプル値の最大値
-	float val_lim_min; //描画領域のサンプル値の最小値の可動域の最小値
-	float val_lim_max; //描画領域のサンプル値の最大値の可動域の最大値
-};
+#include "ui_design.h"
+#include "GraphPara.h"
+#include "Animation.h"
 
 //GUIクラス
 class GUI {

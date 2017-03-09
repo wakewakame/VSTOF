@@ -176,6 +176,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AllProcess.cpp" />
     <ClCompile Include="src\Animation.cpp" />
     <ClCompile Include="src\FBO.cpp" />
     <ClCompile Include="src\Frame.cpp" />
@@ -189,7 +190,9 @@
     <ClCompile Include="src\win_event.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AllProcess.h" />
     <ClInclude Include="src\Animation.h" />
+    <ClInclude Include="src\define.h" />
     <ClInclude Include="src\FBO.h" />
     <ClInclude Include="src\Frame.h" />
     <ClInclude Include="src\GraphPara.h" />

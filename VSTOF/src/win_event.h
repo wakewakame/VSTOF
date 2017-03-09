@@ -1,3 +1,7 @@
+#pragma once
+
+#include "define.h"
+
 //ウィンドウイベント処理クラス
 class WIN_EVENT {
 public:

@@ -1,3 +1,7 @@
+#pragma once
+
+#include "define.h"
+
 //アニメーション変数管理クラス
 class Animation {
 private:

@@ -1,3 +1,7 @@
+#pragma once
+
+#include "define.h"
+
 //グラフパラメータ保持
 /*
 使い方
@@ -6,15 +10,6 @@
 パラメータの可動域は必要があれば設定
 ウィンドウのx,y座標に対応する次元の設定
 */
-struct Dimension {
-	bool on_limit_min; //パラメータの可動域の最小値が有効かどうか
-	bool on_limit_max; //パラメータの可動域の最大値が有効かどうか
-	float limit_min; //パラメータの可動域の最小値
-	float limit_max; //パラメータの可動域の最大値
-	int min_index; //グラフの描画域の最小値パラメータのインデックス
-	int max_index; //グラフの描画域の最大値パラメータのインデックス
-	std::vector<float> val; //パラメータの値の配列
-};
 class GraphPara {
 private:
 	std::vector<Dimension> param; //各次元のパラメータ配列

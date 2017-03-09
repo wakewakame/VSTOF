@@ -10,14 +10,31 @@
     <ClCompile Include="src\GUI.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\Animation.cpp" />
-    <ClCompile Include="src\FBO.cpp" />
-    <ClCompile Include="src\Frame.cpp" />
-    <ClCompile Include="src\GraphPara.cpp" />
-    <ClCompile Include="src\ShareMem.cpp" />
-    <ClCompile Include="src\ui_design.cpp" />
-    <ClCompile Include="src\win_event.cpp" />
     <ClCompile Include="src\Placement.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AllProcess.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Animation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FBO.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Frame.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GraphPara.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ShareMem.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ui_design.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\win_event.cpp">
       <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
@@ -36,18 +53,40 @@
     <ClInclude Include="src\GUI.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClInclude Include="src\Animation.h" />
-    <ClInclude Include="src\FBO.h" />
-    <ClInclude Include="src\Frame.h" />
-    <ClInclude Include="src\GraphPara.h" />
-    <ClInclude Include="src\ShareMem.h" />
-    <ClInclude Include="src\ui_design.h" />
-    <ClInclude Include="src\win_event.h" />
     <ClInclude Include="src\Placement.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AllProcess.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\define.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\win_event.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Animation.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\FBO.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Frame.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\GraphPara.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ShareMem.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\ui_design.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="icon.rc" />
+    <ResourceCompile Include="icon.rc">
+      <Filter>src</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

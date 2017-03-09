@@ -1,9 +1,6 @@
-//共有メモリ構造体
-struct ShareMemData {
-	HWND Ready; //GUIクライアントが起動直後にTRUEにする(多重起動回避のため)
-	HWND Host; //描画先ハンドル
-	VSTParameteres para; //VSTのパラメーター群
-};
+#pragma once
+
+#include "define.h"
 
 //共有メモリアクセスクラス
 class ShareMem {
@@ -13,6 +10,7 @@ public:
 	ShareMemData *smd = nullptr; //共有メモリデータポインタ
 	int ShareMemSize = sizeof(ShareMemData); //マップのサイズ
 
-											 //関数宣言
+	//関数宣言
+	~ShareMem();
 	bool Open(LPCTSTR MapName);
 };

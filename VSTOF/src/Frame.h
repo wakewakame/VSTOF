@@ -1,19 +1,6 @@
-//フレーム構造体
-struct frame {
-	frame *parent; //親フレームのポインタ
-	int num_child; //子フレームの数
-	std::vector<frame*> childs; //全子フレームのポインタ配列
-	int index;//同フレーム内の自フレームの割当番号(=0,1,2,3,...)
-	RECT pos; //フレーム座標
-	POINT size; //フレームサイズ(末端フレームのみ代入)
-	std::string name; //フレームの名称
-	bool mode; //子フレームが縦並び=0,横並び=1
-	int gap; //子フレーム間同士の隙間(px単位)
-	int length; //全フレームが初期値サイズ時の自フレームのサイズ
-	bool lock; //各子フレームの長さ(mode=0なら縦幅,mode=1なら横幅)の固定on/off
-	int lock_length; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
-	std::vector<void*> data; //汎用配列(クラスのポインタなど)
-};
+#pragma once
+
+#include "define.h"
 
 //フレーム操作クラス
 class Frames {
