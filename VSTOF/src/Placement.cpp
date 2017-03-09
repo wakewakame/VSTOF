@@ -1,8 +1,8 @@
 #include "Placement.h"
 
 Parameteres::Parameteres() { //全パラメーター分のフレーム作成
-				//フレーム生成
-				//frames.add(frame *parent, frame *self, std::string name, int length, bool lock)
+	//フレーム生成
+	//frames.add(frame *parent, frame *self, std::string name, int length, bool lock)
 	frames.add(nullptr, &p_frame.root, "root", 0, 0);
 	frames.add(&p_frame.root, &p_frame.all, "all", 0, 0);
 	frames.add(&p_frame.root, &p_frame.scroll, "scroll", 16, 1);
@@ -44,6 +44,9 @@ Parameteres::Parameteres() { //全パラメーター分のフレーム作成
 	frames.set_parent(&p_frame.fadechange, 1, 2);
 
 	frames.get_length(&p_frame.root); //全フレームのlength等取得
+
+	//ツリー構造のCUI描画(DEBUG用)
+	draw_node_name(&p_frame.root);
 }
 
 Parameteres::~Parameteres() {
@@ -75,11 +78,14 @@ void Draw::loop() { //ループ中に呼び出す関数
 	//フレームの名称描画
 	gui.FrameName(&para.p_frame.root);
 	//各パラメーター描画
+	
+	/*
 	{
 		gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
 		gui.sw(&para.p_frame.raw_wave_para, &a);
 		gui.volume_gui(&para.p_frame.rawwave, &b);
 	}
+	*/
 	//毎フレーム呼び出し関数
 	gui.loop();
 }

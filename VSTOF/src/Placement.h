@@ -51,7 +51,7 @@ public:
 	//コンストラクト
 	Frames frames; //フレーム操作クラス
 
-				   //変数初期化
+	//変数初期化
 	VSTParameteres *p_value; //パラメーター値変数群ポインタ
 	VSTParameteresFrames p_frame; //パラメーターフレーム変数群
 
@@ -60,6 +60,62 @@ public:
 	Parameteres();
 	//デストラクタ
 	~Parameteres();
+
+	//ツリー構造のCUI描画(DEGUG用)
+	void draw_node_name(frame *f) {
+		std::string tree = "[frame nodes tree viewer]\n";
+		std::vector<int> gap;
+		tree = draw_node_name(f, gap, tree);
+		std::cout << tree << std::endl;
+	}
+	string draw_node_name(frame *f, std::vector<int> gap, std::string tree) {
+		bool pop_back = true;
+		if (f->parent != nullptr) {
+			if (f->parent->parent != nullptr) {
+				if (f->parent->parent->childs[f->parent->parent->childs.size() - 1] == f->parent) {
+					if (gap.size() >= 2) {
+						gap[gap.size() - 2] += gap[gap.size() - 1] + 2;
+						gap.pop_back();
+						pop_back = false;
+					}
+				}
+			}
+		}
+		if (f->parent != nullptr) {
+			if (f->parent->childs[0] == f) {
+				if (f->childs.size() == 1) {
+					tree += "━";
+				}else {
+					tree += "┳";
+				}
+			}else {
+				tree += "\n";
+				for(int i = 0; i < gap.size(); i++) {
+					for (int j = 0; j < gap[i]; j++) {
+						tree += " ";
+					}
+					if (i == (gap.size() - 1)) {
+						break;
+					}
+					tree += "┃";
+				}
+				if (f->parent->childs[f->parent->childs.size() - 1] == f) {
+					tree += "┗";
+				}else {
+					tree += "┣";
+				}
+			}
+		}
+		tree += f->name;
+		gap.push_back(f->name.length());
+		for (int i = 0; i < f->childs.size(); i++) {
+			tree = draw_node_name(f->childs[i], gap, tree);
+		}
+		if (pop_back) {
+			gap.pop_back();
+		}
+		return tree;
+	}
 };
 
 //描画クラス
@@ -71,7 +127,7 @@ public:
 	bool a; //デバッグ用
 	float b; //デバッグ用
 
-			 //コンストラクト
+	//コンストラクト
 	Parameteres para;
 	GUI gui;
 
