@@ -43,6 +43,12 @@ Parameteres::Parameteres() { //全パラメーター分のフレーム作成
 	frames.set_parent(&p_frame.fadechange, 1, 2);
 	frames.set_parent(&p_frame.fadechange, 1, 2);
 
+	//set_description(frame *f, std::string description)
+	frames.set_description(&p_frame.tone, "Timbre setting");
+	frames.set_description(&p_frame.make_auto, "Automatically generate tone");
+	frames.set_description(&p_frame.use_rawwave, "Use raw sound source");
+	frames.set_description(&p_frame.rawwave, "Trimming");
+
 	frames.get_length(&p_frame.root); //全フレームのlength等取得
 
 	//ツリー構造のCUI描画(DEBUG用)
@@ -51,6 +57,10 @@ Parameteres::Parameteres() { //全パラメーター分のフレーム作成
 
 Parameteres::~Parameteres() {
 	frames.all_dispose(&p_frame.root);
+}
+
+void Draw::set_p_value(VSTParameteres *p_value) {
+	para.p_value = p_value;
 }
 
 bool Draw::resize(WINDOW_INFO win_info) { //描画領域変更
@@ -71,21 +81,25 @@ bool Draw::resize(WINDOW_INFO win_info) { //描画領域変更
 }
 
 void Draw::loop() { //ループ中に呼び出す関数
-			  //画面初期化
+	//画面初期化
 	gui.reset();
 	//フレームの境界線描画
 	gui.FrameLine(&para.p_frame.root);
 	//フレームの名称描画
 	gui.FrameName(&para.p_frame.root);
 	//各パラメーター描画
-	
+	VSTParameteresFrames *f = &para.p_frame;
+	VSTParameteres *p = para.p_value;
+
+	gui.sw(&f->make_auto, &p->make_auto);
 	/*
 	{
-		gui.wave_gui(&para.p_frame.make_auto, para.p_value->outwave, para.p_value->noutwave, 0);
-		gui.sw(&para.p_frame.raw_wave_para, &a);
-		gui.volume_gui(&para.p_frame.rawwave, &b);
+		gui.wave_gui(&f.make_auto, p->outwave, p->noutwave, 0);
+		gui.sw(&f.raw_wave_para, &a);
+		gui.volume_gui(&f.rawwave, &b);
 	}
 	*/
+
 	//毎フレーム呼び出し関数
 	gui.loop();
 }

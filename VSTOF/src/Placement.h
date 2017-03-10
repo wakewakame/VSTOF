@@ -77,6 +77,7 @@ public:
 	GUI gui;
 
 	//ŠÖ”éŒ¾
+	void set_p_value(VSTParameteres *p_value);
 	bool resize(WINDOW_INFO win_info);
 	void loop();
 };

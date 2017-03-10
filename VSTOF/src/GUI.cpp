@@ -51,6 +51,7 @@ void GUI::FrameName(frame *root) {
 	else {
 		//子フレームを持っていない場合
 		ofDrawBitmapString(root->name, root->pos.left + 4, root->pos.top + 12);
+		ofDrawBitmapString(root->description, root->pos.left + 4, root->pos.top + 24);
 	}
 }
 
@@ -373,8 +374,7 @@ void GUI::sw(frame *f, bool *sw) {
 		animation->add(1.0, 4, &loop);
 		animation->set_fps(fps); //fps指定
 		fbo->add(60, 60);
-	}
-	else {
+	}else {
 		animation = (Animation*)f->data[0];
 		fbo = (FBO*)f->data[1];
 	}

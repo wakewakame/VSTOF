@@ -64,6 +64,7 @@ struct frame {
 	RECT pos; //フレーム座標
 	POINT size; //フレームサイズ(末端フレームのみ代入)
 	std::string name; //フレームの名称
+	std::string description; //フレーム内のUIの解説
 	bool mode; //子フレームが縦並び=0,横並び=1
 	int gap; //子フレーム間同士の隙間(px単位)
 	int length; //全フレームが初期値サイズ時の自フレームのサイズ

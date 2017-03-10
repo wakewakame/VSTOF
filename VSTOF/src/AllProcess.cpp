@@ -19,7 +19,7 @@ bool AllProcess::init(LPSTR cmd, WINDOW_INFO win_info2) { //初期化時実行関数
 	}
 	//その他
 	//共有メモリデータをパラメータクラスの変数と同期
-	draw.para.p_value = &sm.smd->para;
+	draw.set_p_value(&sm.smd->para);
 	return 0;
 }
 

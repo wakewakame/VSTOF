@@ -9,6 +9,7 @@ void Frames::add(frame *parent, frame *self, std::string name, int length, bool 
 	self->pos.bottom = 0; //フレーム下座標
 	self->size = { 0,0 }; //フレームサイズ
 	self->name = name; //フレームの名称
+	self->description = ""; //解説はオプションなのでとりあえず無記入
 	self->mode = 0; //子フレームが縦並び=0,横並び=1
 	self->gap = 0; //子フレーム間同士の隙間(px単位)
 	self->length = length; //全フレームが初期値サイズ時の自フレームのサイズ
@@ -29,6 +30,10 @@ void Frames::set_parent(frame *self, bool mode, int gap) {
 	self->mode = mode; //子フレームが横並びなら0,縦並びなら1
 	self->gap = gap; //小フレーム間の隙間サイズ(px単位)
 	return;
+}
+
+void Frames::set_description(frame *self, std::string description) {
+	self->description = description;
 }
 
 void Frames::get_length(frame *f) {

@@ -11,9 +11,9 @@ int Animation::get_len() {
 void Animation::add(double length, char effect_type, bool *sw) {
 	motion.push_back(0);
 	len.push_back(length);
-	t.push_back(0.0);
-	m.push_back(0.0);
-	p.push_back(0.0);
+	t.push_back(length * (*sw));
+	m.push_back((double)(*sw));
+	p.push_back((double)(*sw));
 	type.push_back(effect_type);
 	swp.push_back(sw);
 	bsw.push_back(*sw);
