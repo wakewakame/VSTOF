@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Debug.h"
 #include "define.h"
 #include "ShareMem.h"
 #include "Placement.h"
@@ -13,7 +14,6 @@ public:
 						  //コンストラクト
 	ShareMem sm; //共有メモリクラス
 	Draw draw; //描画クラス
-	std::string title; //ウィンドウタイトル文字列
 
 					   //関数宣言
 	bool init(LPSTR cmd, WINDOW_INFO win_info2);

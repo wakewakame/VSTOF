@@ -83,6 +83,9 @@
     <ClInclude Include="src\ui_design.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Debug.h">
+      <Filter>src</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc">

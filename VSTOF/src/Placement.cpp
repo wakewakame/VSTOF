@@ -46,7 +46,7 @@ Parameteres::Parameteres() { //全パラメーター分のフレーム作成
 	frames.get_length(&p_frame.root); //全フレームのlength等取得
 
 	//ツリー構造のCUI描画(DEBUG用)
-	draw_node_name(&p_frame.root);
+	Debug::draw_node_name(&p_frame.root);
 }
 
 Parameteres::~Parameteres() {

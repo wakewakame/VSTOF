@@ -36,12 +36,7 @@ bool AllProcess::loop() { //ƒ‹[ƒv’†‚ÉŒÄ‚Ño‚·ŠÖ”
 	}
 	//GUI•`‰æ
 	draw.loop();
-	///debug///
-	title = "";
-	title += "fps:";
-	title += std::to_string(ofGetFrameRate());
-	SetWindowText(win_info.hwnd, (LPSTR)title.c_str());
-	///debug///
+	Debug::SetFpsTitle(win_info);
 	return 0;
 }
 

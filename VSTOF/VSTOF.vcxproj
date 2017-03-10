@@ -192,6 +192,7 @@
   <ItemGroup>
     <ClInclude Include="src\AllProcess.h" />
     <ClInclude Include="src\Animation.h" />
+    <ClInclude Include="src\Debug.h" />
     <ClInclude Include="src\define.h" />
     <ClInclude Include="src\FBO.h" />
     <ClInclude Include="src\Frame.h" />

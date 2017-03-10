@@ -92,6 +92,11 @@ public:
 		j = j_min + (i - i_mix) * ((j_max - j_min) / (i_max - i_mix));
 		return j;
 	}
+	static float Proportion(float i, float i_mix, float i_max, float j_min, float j_max) {
+		float j;
+		j = int(Proportion(double(i), double(i_mix), double(i_max), double(j_min), double(j_max)));
+		return j;
+	}
 	static int Proportion(int i, int i_mix, int i_max, int j_min, int j_max) {
 		int j;
 		j = int(Proportion(double(i), double(i_mix), double(i_max), double(j_min), double(j_max)));
