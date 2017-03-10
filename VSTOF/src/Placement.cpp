@@ -92,6 +92,8 @@ void Draw::loop() { //ƒ‹[ƒv’†‚ÉŒÄ‚Ño‚·ŠÖ”
 	VSTParameteres *p = para.p_value;
 
 	gui.sw(&f->make_auto, &p->make_auto);
+	gui.sw(&f->use_rawwave, &p->use_rawwave);
+	gui.wave_gui(&f->rawwave, p->rawwave, p->nrawwave, 0); //<-nrawwave‚ªDXVST2‚Ì•û‚Å‘ã“ü‚³‚ê‚Ä‚È‚¢‚Á‚Û‚¢
 	/*
 	{
 		gui.wave_gui(&f.make_auto, p->outwave, p->noutwave, 0);
