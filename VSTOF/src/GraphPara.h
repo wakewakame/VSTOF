@@ -60,7 +60,6 @@ public:
 	const int get_active();
 	//ウィンドウのx,y座標に対応する次元数の設定
 	void set_window_dim(int set_x_dim, int set_y_dim);
-	void set_window_dim(int set_x_dim, int set_y_dim, int set_height);
 	//ウィンドウのx座標に対応する次元数の取得
 	const int get_x_dim();
 	//ウィンドウのy座標に対応する次元数の取得
@@ -73,7 +72,7 @@ public:
 	const bool hit(RECT area, WindowPos pos);
 	const bool hit(POINT center, POINT size, WindowPos pos);
 	//ドラッグ時マウス追従関数
-	void seek(int index, WindowPos n_mouse, bool l_click, POINT size);
+	void seek(int index, WindowPos n_mouse, bool l_click, bool b_l_click, POINT size);
 	//パラメータ変更時関数関数
 	void limiter(int index);
 };

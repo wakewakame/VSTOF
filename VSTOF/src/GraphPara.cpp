@@ -111,11 +111,12 @@ const int GraphPara::get_active() {
 void GraphPara::set_window_dim(int set_x_dim, int set_y_dim) {
 	x_dim = set_x_dim;
 	y_dim = set_y_dim;
-}
-
-void GraphPara::set_window_dim(int set_x_dim, int set_y_dim, int set_height) {
-	set_window_dim(set_x_dim, set_y_dim);
-	height = set_height;
+	if (x_dim == -1) {
+		height = f->size.x / 2;
+	}
+	if (y_dim == -1) {
+		height = f->size.y / 2;
+	}
 }
 
 const int GraphPara::get_x_dim() {
@@ -212,9 +213,9 @@ const bool GraphPara::hit(POINT center, POINT size, WindowPos pos) {
 	}, pos);
 }
 
-void GraphPara::seek(int index, WindowPos n_mouse, bool l_click, POINT size) {
+void GraphPara::seek(int index, WindowPos n_mouse, bool l_click, bool b_l_click, POINT size) {
 	mouse = n_mouse;
-	if (hit(get_pos(index), size, n_mouse) && l_click && get_active() == -1) {
+	if (hit(get_pos(index), size, n_mouse) && (!b_l_click) && l_click && get_active() == -1) {
 		set_active(index);
 	}
 	if ((get_active() == index) && (!l_click)) {

@@ -314,11 +314,11 @@ void GUI::volume(frame *f, float *val) {
 		//パラメータの役割設定
 		param->set_min(0, 0);
 		param->set_max(0, 1);
-		//パラメータ可動域設定
+		//可動範囲設定
 		param->limit_min(0.0f, 0);
 		param->limit_max(1.0f, 0);
 		//ウィンドウのx座標に対応する次元数の設定
-		param->set_window_dim(0, -1, height);
+		param->set_window_dim(0, -1);
 	}
 	else {
 		param = (GraphPara*)(f->data[0]);
@@ -330,6 +330,122 @@ void GUI::volume(frame *f, float *val) {
 	cursor(param, 2, ui.x_pointer_cursor); //パラメータ描画
 	*val = param->get_param(0, 2);
 }
+
+void GUI::scroll(frame *f, frame *parent_f) {
+	GraphPara *param; //スクロールバーの位置を保持するパラメータクラス
+	frame *sf; //スクロールバーを描画するフレーム
+	int width; //スクロールバーの幅(定数)
+	int stick_length = parent_f->size.y * parent_f->size.y / f->size.y;
+	if (f->data.size() == 0) {
+		//グラフパラメータクラス
+		parent_f->data.push_back(new frame);
+		parent_f->data.push_back(new GraphPara);
+		//クラスのポインタ代入
+		sf = (frame*)f->data[0];
+		param = (GraphPara*)f->data[1];
+		//フレーム設定
+		sf->size.x = width;
+		sf->size.y = parent_f->size.y - stick_length;
+		sf->pos.left = parent_f->pos.right - width;
+		sf->pos.right = parent_f->pos.right;
+		sf->pos.top = parent_f->pos.top + stick_length / 2;
+		sf->pos.bottom = parent_f->pos.bottom - stick_length / 2;
+		//フレームのポインタ代入
+		param->set_frame(sf);
+		//パラメータ追加
+		param->create(1, 0.0f); //最小値
+		param->create(1, 1.0f); //最大値
+		param->create(1, 1.0f); //スクロールバー位置(0.0f~1.0f)
+								//パラメータの役割設定
+		param->set_min(0, 0);
+		param->set_max(0, 1);
+		//可動範囲設定
+		param->limit_min(0.0f, 0);
+		param->limit_max(1.0f, 0);
+		//ウィンドウのy座標に対応する次元数の設定
+		param->set_window_dim(-1, 0);
+	}
+	else {
+		sf = (frame*)f->data[0];
+		param = (GraphPara*)f->data[1];
+		//フレーム設定
+		sf->size.x = f->size.x;
+		sf->size.y = f->size.y - stick_length;
+		sf->pos.left = f->pos.left;
+		sf->pos.right = f->pos.right;
+		sf->pos.top = f->pos.top + stick_length / 2;
+		sf->pos.bottom = f->pos.bottom - stick_length / 2;
+	}
+	//バー描画
+	POINT pos;
+	POINT size = { f->size.x, stick_length };
+	param->seek(2, win_event.mouse, win_event.l_click, win_event.b_l_click, size);
+	pos = param->get_pos(2);
+	ofSetColor(255, 255, 255, 198);
+	ofRect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
+	//スクロールバー更新時にparent_fの移動
+	parent_f->pos.top = f->pos.top - (parent_f->size.y - f->size.y)*(1.0f - param->get_param(0, 2));
+	parent_f->pos.bottom = parent_f->pos.top + parent_f->size.y;
+	frames.resize(parent_f, parent_f->pos);
+}
+
+/*
+void GUI::scroll(frame *f, frame *moved_f) {
+	GraphPara *param;
+	frame *sf;
+	int stick_length = f->size.y * f->size.y / moved_f->size.y;
+	if (f->data.size() == 0) {
+		//グラフパラメータクラス
+		f->data.push_back(new frame);
+		f->data.push_back(new GraphPara);
+		//クラスのポインタ代入
+		sf = (frame*)f->data[0];
+		param = (GraphPara*)f->data[1];
+		//フレーム設定
+		sf->size.x = f->size.x;
+		sf->size.y = f->size.y - stick_length;
+		sf->pos.left = f->pos.left;
+		sf->pos.right = f->pos.right;
+		sf->pos.top = f->pos.top + stick_length / 2;
+		sf->pos.bottom = f->pos.bottom - stick_length / 2;
+		//フレームのポインタ代入
+		param->set_frame(sf);
+		//パラメータ追加
+		param->create(1, 0.0f); //最小値
+		param->create(1, 1.0f); //最大値
+		param->create(1, 1.0f); //スクロールバー位置(0.0f~1.0f)
+		//パラメータの役割設定
+		param->set_min(0, 0);
+		param->set_max(0, 1);
+		//可動範囲設定
+		param->limit_min(0.0f, 0);
+		param->limit_max(1.0f, 0);
+		//ウィンドウのy座標に対応する次元数の設定
+		param->set_window_dim(-1, 0);
+	}else{
+		sf = (frame*)f->data[0];
+		param = (GraphPara*)f->data[1];
+		//フレーム設定
+		sf->size.x = f->size.x;
+		sf->size.y = f->size.y - stick_length;
+		sf->pos.left = f->pos.left;
+		sf->pos.right = f->pos.right;
+		sf->pos.top = f->pos.top + stick_length / 2;
+		sf->pos.bottom = f->pos.bottom - stick_length / 2;
+	}
+	//バー描画
+	POINT pos;
+	POINT size = {f->size.x, stick_length};
+	param->seek(2, win_event.mouse, win_event.l_click, win_event.b_l_click, size);
+	pos = param->get_pos(2);
+	ofSetColor(255, 255, 255, 198);
+	ofRect(pos.x - size.x / 2, pos.y - size.y / 2, size.x, size.y);
+	//スクロールバー更新時にmoved_fの移動
+	moved_f->pos.top = f->pos.top - (moved_f->size.y - f->size.y)*(1.0f - param->get_param(0, 2));
+	moved_f->pos.bottom = moved_f->pos.top + moved_f->size.y;
+	frames.resize(moved_f, moved_f->pos);
+}
+*/
 
 void GUI::volume_gui(frame *f, float *val) {
 	frame *vol_f;
@@ -343,13 +459,14 @@ void GUI::volume_gui(frame *f, float *val) {
 	vol_f->pos.top = f->pos.top + 20;
 	vol_f->pos.right = vol_f->pos.left + vol_f->size.x;
 	vol_f->pos.bottom = vol_f->pos.top + vol_f->size.y;
+
 	volume(vol_f, val);
 }
 
 void GUI::cursor(GraphPara *param, int index, char mode) {
 	POINT pos;
 	POINT size = ui.fbo.get_size(mode);
-	param->seek(index, win_event.mouse, win_event.l_click, size);
+	param->seek(index, win_event.mouse, win_event.l_click, win_event.b_l_click, size);
 	pos = param->get_pos(index);
 	ui.fbo.draw_c(pos.x - size.x / 2, pos.y - size.y / 2, mode);
 }

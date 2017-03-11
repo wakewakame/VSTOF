@@ -40,7 +40,7 @@ void Frames::get_length(frame *f) {
 	if (f->num_child != 0) {
 		f->length = 0; //全子フレームと全gapの和
 		f->lock_length = 0; //固定サイズの全子フレームと全gapの和(末端フレームは0を代入)
-							//子フレームの個数分ループ
+		//子フレームの個数分ループ
 		for (int i = 0; i < f->num_child; i++) {
 			//子フレームが子フレームを持っていた場合、再帰
 			if (f->childs[i]->num_child != 0) {

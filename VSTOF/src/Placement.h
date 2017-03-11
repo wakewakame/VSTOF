@@ -8,9 +8,9 @@
 
 //パラメーター値構造体
 struct VSTParameteresFrames {
+	frame window;
+
 	frame root;
-	frame all;
-	frame scroll;
 	frame tone, fade;
 	//音色系
 	frame make_auto; //自動で音色を生成するか
@@ -69,8 +69,6 @@ public:
 	//変数宣言
 	float fps;
 	RECT win_size;
-	bool a; //デバッグ用
-	float b; //デバッグ用
 
 	//コンストラクト
 	Parameteres para;

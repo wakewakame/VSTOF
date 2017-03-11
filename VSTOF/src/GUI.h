@@ -53,6 +53,8 @@ public:
 	void volume(frame *f, float *val);
 	//ボリュームUI
 	void volume_gui(frame *f, float *val);
+	//スクロールバー描画
+	void scroll(frame *f, frame *parent_f);
 	//パラメータカーソル描画関数
 	void cursor(GraphPara *param, int index, char mode);
 	//スイッチUI
