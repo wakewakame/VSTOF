@@ -131,12 +131,24 @@ const POINT GraphPara::get_pos(int index) {
 	POINT pos;
 	if (get_active() == index) {
 		if (x_dim != -1) {
+			if (mouse.x < f->pos.left) {
+				mouse.x = f->pos.left;
+			}
+			if (mouse.x > f->pos.right) {
+				mouse.x = f->pos.right;
+			}
 			pos.x = mouse.x;
 		}
 		else {
 			pos.x = f->pos.left + height;
 		}
 		if (y_dim != -1) {
+			if (mouse.y < f->pos.top) {
+				mouse.y = f->pos.top;
+			}
+			if (mouse.y > f->pos.bottom) {
+				mouse.y = f->pos.bottom;
+			}
 			pos.y = mouse.y;
 		}
 		else {

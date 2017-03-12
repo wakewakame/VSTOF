@@ -35,7 +35,7 @@ Parameteres::Parameteres() { //全パラメーター分のフレーム作成
 	frames.add(&p_frame.fadechange, &p_frame.fadechange_pitch, "fadechange_pitch", 100, 0);
 
 	//set_parent(frame *self, bool mode, int gap)
-	frames.set_parent(&p_frame.root, 1, 2);
+	frames.set_parent(&p_frame.root, 0, 2);
 	frames.set_parent(&p_frame.hostpar, 1, 2);
 	frames.set_parent(&p_frame.fadein, 1, 2);
 	frames.set_parent(&p_frame.fadeout, 1, 2);
@@ -48,7 +48,8 @@ Parameteres::Parameteres() { //全パラメーター分のフレーム作成
 	frames.set_description(&p_frame.use_rawwave, "Use raw sound source");
 	frames.set_description(&p_frame.rawwave, "Trimming");
 
-	frames.get_length(&p_frame.root); //全フレームのlength等取得
+	frames.get_length(&p_frame.root); //root下全フレームのlength等取得
+	frames.resize(&p_frame.root, { 0,0,1,p_frame.root.length }); //rootフレーム一時リサイズ
 
 	//ツリー構造のCUI描画(DEBUG用)
 	Debug::draw_node_name(&p_frame.root);
@@ -73,6 +74,7 @@ bool Draw::resize(WINDOW_INFO win_info) { //描画領域変更
 	para.p_frame.window.pos.bottom = win_info.size.y;
 	para.p_frame.window.size = win_info.size;
 	fps = win_info.fps;
+	gui.set_fps(fps);
 	return 0;
 }
 
@@ -94,11 +96,12 @@ void Draw::loop() { //ループ中に呼び出す関数
 	gui.sw(&f->use_rawwave, &p->use_rawwave);
 	ofSetColor(255, 255, 255, 255);
 	gui.wave_gui(&f->rawwave, p->rawwave, p->nrawwave, 0); //<-nrawwaveがDXVST2の方で代入されてないっぽい
+	
 	/*
 	{
-		gui.wave_gui(&f.make_auto, p->outwave, p->noutwave, 0);
-		gui.sw(&f.raw_wave_para, &a);
-		gui.volume_gui(&f.rawwave, &b);
+		gui.wave_gui(&f->make_auto, p->outwave, p->noutwave, 0);
+		gui.sw(&f->use_rawwave, &p->use_rawwave);
+		//gui.volume_gui(&f->rawwave, &b);
 	}
 	*/
 
